@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12142b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Stack Rush">
+<meta name="description" content="Stack 50 blocks and beat Oga Contractor.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Stack Rush</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: one-column phone game. Boss and score on top, progress meter, tall tower stage, stats strip below.
+     The owner's claims page lives at #admin and uses the same tokens. */
+  :root {
+    --ink: #12142b;
+    --panel: #1b1e3d;
+    --line: #2e3369;
+    --text: #eceeff;
+    --muted: #a2a8d9;
+    --gold: #ffb02e;
+    --hot: #ff5d7a;
+    --ok: #5be3a1;
+    --info: #7fb0ff;
+    --font-display: 'Bricolage Grotesque', 'Arial Black', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding-top: max(12px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .app {
+    width: 100%;
+    max-width: 460px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .hud { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .boss {
+    display: flex; align-items: center; gap: 10px; min-width: 0;
+    background: none; border: 0; padding: 4px; margin: -4px;
+    color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 12px;
+  }
+  .boss:focus-visible, .link:focus-visible, .sbtn:focus-visible, .field input:focus-visible, .paste textarea:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .face-wrap { position: relative; flex: none; }
+  .face-wrap .q {
+    position: absolute; right: -5px; bottom: -3px; width: 19px; height: 19px; border-radius: 50%;
+    background: var(--text); color: var(--ink);
+    font: 800 12px/19px var(--font-display); text-align: center;
+  }
+  .face { width: 46px; height: 46px; display: block; }
+  .face .skin { fill: var(--gold); }
+  .face .ink { fill: var(--ink); }
+  .face .stroke { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; fill: none; }
+  .face .m-worry { display: none; }
+  .face.worried .m-worry { display: inline; }
+  .face.worried .m-smirk { display: none; }
+  .face.shake { animation: shake .35s; }
+  @keyframes shake { 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+  .boss-text { display: flex; flex-direction: column; min-width: 0; }
+  .boss-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .hint { color: var(--muted); font-size: 13px; line-height: 1.3; }
+
+  /* Oga Contractor's speech bubble, over the top of the stage */
+  .bubble {
+    position: absolute; z-index: 2; top: 42px; left: 12px;
+    max-width: min(88%, 340px);
+    background: var(--gold); color: var(--ink);
+    font: 700 17px/1.3 var(--font-display);
+    padding: 10px 14px; border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+    pointer-events: none;
+    overflow-wrap: anywhere; text-wrap: balance;
+    transform-origin: 20px 0;
+  }
+  .bubble::before {
+    content: ""; position: absolute; top: -9px; left: 20px;
+    border-style: solid; border-width: 0 8px 9px; border-color: transparent transparent var(--gold);
+  }
+  .bubble.pop { animation: pop .28s ease-out; }
+  @keyframes pop {
+    0% { transform: scale(.82) translateY(-6px); opacity: 0; }
+    60% { transform: scale(1.04); opacity: 1; }
+    100% { transform: none; opacity: 1; }
+  }
+  .quote { margin: 0; max-width: 24ch; font: 800 21px/1.25 var(--font-display); color: var(--gold); text-wrap: balance; }
+  .tip { width: 100%; max-width: 300px; text-align: left; color: var(--muted); font-size: 12px; line-height: 1.45; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+  .tip summary { cursor: pointer; font-weight: 700; color: var(--text); }
+  .tip summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .tip p { margin: 6px 0 0; }
+  .score { display: flex; align-items: baseline; gap: 6px; flex: none; font-variant-numeric: tabular-nums; }
+  .score b { font-family: var(--font-display); font-weight: 800; font-size: 44px; line-height: 1; }
+  .score span { color: var(--muted); font-size: 16px; }
+
+  .meter { height: 8px; border-radius: 99px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #5b8cff, #c06bff 60%, var(--gold)); transition: width .15s linear; }
+
+  .stage {
+    position: relative;
+    flex: 1;
+    min-height: 300px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: linear-gradient(#1d2152, #10122a);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+  .mute {
+    position: absolute; top: 8px; right: 8px;
+    font: 500 12px var(--font-body);
+    color: var(--muted);
+    background: rgba(18, 20, 43, .7);
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  .overlay {
+    position: absolute; inset: 0;
+    display: flex;
+    overflow-y: auto;
+    padding: 20px;
+    background: rgba(12, 13, 32, .72);
+    animation: fade .25s ease-out;
+  }
+  .ov-inner { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; width: 100%; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .chip {
+    margin: 0;
+    font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 99px;
+    padding: 4px 12px;
+  }
+  .overlay h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(36px, 11vw, 52px);
+    line-height: 1;
+    text-wrap: balance;
+  }
+  .lead { margin: 0; max-width: 30ch; color: var(--muted); line-height: 1.45; }
+  .fine { margin: 0; max-width: 32ch; color: var(--muted); font-size: 12px; line-height: 1.4; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .btn {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--gold);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 12px 24px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn.ghost { background: transparent; color: var(--text); border-color: var(--line); font-size: 15px; padding: 12px 18px; }
+  .btn[aria-disabled="true"], .btn:disabled { opacity: .45; pointer-events: none; }
+  .btn:focus-visible, .mute:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+  .claim-form { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+  .field { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
+  .field label { font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+  .field input {
+    font: 500 16px var(--font-body);
+    color: var(--text);
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 12px;
+    width: 100%;
+  }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; }
+  .stats div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .stats dt { margin: 0; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .stats dd { margin: 2px 0 0; font-family: var(--font-display); font-weight: 800; font-size: 19px; font-variant-numeric: tabular-nums; }
+  .adminlink { margin: 0; font-size: 13px; text-align: center; }
+  .link { color: var(--info); }
+
+  /* boss card */
+  .sheet {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background: rgba(8, 9, 24, .8);
+  }
+  .card {
+    width: 100%; max-width: 400px; max-height: 100%; overflow-y: auto;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .card-head { display: flex; align-items: center; gap: 14px; }
+  .card .face { width: 64px; height: 64px; }
+  .card h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 26px; line-height: 1.1; }
+  .card .role { margin: 0 0 2px; color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .card p { margin: 0; line-height: 1.5; }
+  .card .prize { background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: 13px; }
+
+  /* owner claims page */
+  .admin { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 14px; align-self: flex-start; padding-bottom: 24px; }
+  .admin-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .admin h1 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 28px; }
+  .admin p { margin: 0; color: var(--muted); line-height: 1.45; }
+  .tally { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
+  .tally div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .tally dt { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .tally dd { margin: 2px 0 0; font-family: var(--font-display); font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .tally small { display: block; color: var(--muted); font: 400 11px var(--font-body); }
+  .paste { display: flex; flex-direction: column; gap: 8px; }
+  .paste label { font-weight: 700; }
+  .paste textarea {
+    width: 100%; min-height: 96px; resize: vertical;
+    font: 400 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
+    color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px;
+  }
+  .msg { font-size: 13px; line-height: 1.4; }
+  .msg.err { color: var(--hot); }
+  .msg.ok { color: var(--ok); }
+  .note { font-size: 13px; color: var(--gold); line-height: 1.4; }
+  .claims { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .claim { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .claim .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .cname { font-size: 16px; overflow-wrap: anywhere; }
+  .phone { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; user-select: all; }
+  .meta { font-size: 13px; }
+  .pill { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 99px; padding: 3px 10px; border: 1px solid currentColor; }
+  .pill.pending { color: var(--gold); }
+  .pill.confirmed { color: var(--info); }
+  .pill.paid { color: var(--ok); }
+  .pill.rejected { color: var(--hot); }
+  .flags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .flag { font-size: 12px; line-height: 1.3; color: var(--hot); border: 1px solid var(--hot); border-radius: 8px; padding: 4px 8px; }
+  .flag.clear { color: var(--ok); border-color: var(--ok); }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sbtn {
+    font: 700 13px var(--font-body); padding: 9px 14px; border-radius: 9px;
+    border: 1px solid var(--line); background: transparent; color: var(--text); cursor: pointer;
+  }
+  .sbtn.primary { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  .sbtn.danger { color: var(--hot); border-color: var(--hot); }
+  .sbtn:disabled { opacity: .5; }
+  .empty { border: 1px dashed var(--line); border-radius: 12px; padding: 18px; text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .overlay, .face.shake, .bubble.pop { animation: none; }
+    .meter i { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="app" id="gameView">
+  <header class="hud">
+    <button class="boss" id="bossBtn" type="button" aria-label="Who is Oga Contractor?">
+      <span class="face-wrap">
+        <svg class="face" id="face" viewBox="0 0 48 48" aria-hidden="true">
+          <circle class="skin" cx="24" cy="24" r="22"/>
+          <path class="stroke" d="M9 14 L20 19"/>
+          <path class="stroke" d="M39 14 L28 19"/>
+          <circle class="ink" cx="17" cy="24" r="3"/>
+          <circle class="ink" cx="31" cy="24" r="3"/>
+          <path class="stroke m-smirk" d="M15 34 Q24 40 33 32"/>
+          <path class="stroke m-worry" d="M16 37 Q24 29 32 37"/>
+        </svg>
+        <span class="q" aria-hidden="true">?</span>
+      </span>
+      <span class="boss-text">
+        <span class="boss-name">Oga Contractor</span>
+        <span class="hint">Tap my face. Who am I?</span>
+      </span>
+    </button>
+    <div class="score" aria-live="polite"><b id="score">0</b><span id="targetLbl">/ 50</span></div>
+  </header>
+
+  <div class="meter" id="meter" role="progressbar" aria-label="Blocks stacked" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><i id="meterFill"></i></div>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="Tower stacking game"></canvas>
+    <button class="mute" id="mute" type="button" aria-pressed="false">Sound on</button>
+    <div class="bubble" id="bubble" aria-live="polite" hidden><span id="taunt"></span></div>
+    <div class="overlay" id="overlay">
+      <div class="ov-inner">
+        <p class="chip" id="ovChip">Free to play · Win ₦100</p>
+        <h1 id="ovTitle">Stack Rush</h1>
+        <p class="quote" id="ovQuote" hidden></p>
+        <p class="lead" id="ovText">Tap to drop each block.</p>
+        <form class="claim-form" id="claimBox" hidden>
+          <div class="field"><label for="claimName">Your name</label><input id="claimName" autocomplete="name" maxlength="40"></div>
+          <div class="field"><label for="claimPhone">WhatsApp number</label><input id="claimPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="0801 234 5678"></div>
+          <p class="fine">Send the message as it is, with the code line. Your win is checked before you are paid.</p>
+        </form>
+        <div class="actions">
+          <a class="btn" id="claimLink" href="#" target="_blank" rel="noopener" aria-disabled="true" hidden>Send claim on WhatsApp</a>
+          <button class="btn ghost" id="copyBtn" type="button" hidden>Copy claim</button>
+        </div>
+        <div class="actions">
+          <button class="btn" id="startBtn" type="button">Start</button>
+          <button class="btn ghost" id="openClaimBtn" type="button" hidden>Claim your ₦100</button>
+          <button class="btn ghost" id="installBtn" type="button" hidden>Install app</button>
+          <a class="btn ghost" id="shareBtn" href="#" target="_blank" rel="noopener" hidden>Share on WhatsApp</a>
+          <button class="btn ghost" id="doneBtn" type="button" hidden>I sent it</button>
+        </div>
+        <details class="tip" id="tip">
+          <summary>Add this game to your home screen</summary>
+          <p><b>Android (Chrome):</b> tap the three dots, then Add to Home screen.</p>
+          <p><b>iPhone (Safari):</b> tap Share, then Add to Home Screen.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Rounds</dt><dd id="stRounds">0</dd></div>
+    <div><dt>Best</dt><dd id="stBest">0</dd></div>
+    <div><dt>Boss beaten</dt><dd id="stWins">0</dd></div>
+    <div><dt>Win rate</dt><dd id="stRate">0%</dd></div>
+  </dl>
+  
+</main>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="card">
+    <div class="card-head">
+      <svg class="face" viewBox="0 0 48 48" aria-hidden="true">
+        <circle class="skin" cx="24" cy="24" r="22"/>
+        <path class="stroke" d="M9 14 L20 19"/>
+        <path class="stroke" d="M39 14 L28 19"/>
+        <circle class="ink" cx="17" cy="24" r="3"/>
+        <circle class="ink" cx="31" cy="24" r="3"/>
+        <path class="stroke" d="M15 34 Q24 40 33 32"/>
+      </svg>
+      <div>
+        <p class="role">Holder of the tower contract</p>
+        <h2 id="sheetTitle">Oga Contractor</h2>
+      </div>
+    </div>
+    <p>The biggest contractor in town. His name is on the signboard and he says nobody builds better than him.</p>
+    <p id="sheetGoal">You are the young builder who wants his contract. Stack 50 blocks to the boss line and it is yours.</p>
+    <p class="prize" id="sheetPrize">Prize: ₦100, paid after your win is checked.</p>
+    <button class="btn" id="sheetClose" type="button">Back to the tower</button>
+  </div>
+</div>
+
+<main class="admin" id="adminView" hidden>
+  <div class="admin-top">
+    <h1>Win claims</h1>
+    <a class="link" href="#">Back to game</a>
+  </div>
+  <div id="lockPanel" class="empty" hidden>
+    <p>Only the game owner can see win claims. If that is you, open this page from your own Claude account.</p>
+  </div>
+  <div id="adminTools" hidden>
+    <p id="adminIntro">Players send their win to your WhatsApp. Paste the whole message below. The page replays the round and checks it before it is listed. Claims are saved on this phone only, so always open this page in the same browser on the same phone.</p>
+    <dl class="tally">
+      <div><dt>Pending</dt><dd id="tPending">0</dd><small>waiting for you</small></div>
+      <div><dt>To pay</dt><dd id="tToPay">₦0</dd><small id="tToPayN">0 wins</small></div>
+      <div><dt>Paid</dt><dd id="tPaid">₦0</dd><small id="tPaidN">0 wins</small></div>
+    </dl>
+    <div class="paste">
+      <label for="pasteBox">Paste a win message</label>
+      <textarea id="pasteBox" spellcheck="false" placeholder="Stack Rush win claim&#10;Name: ...&#10;Phone: ...&#10;Code: ..."></textarea>
+      <div class="btns"><button class="sbtn primary" id="checkBtn" type="button">Check and add</button></div>
+      <p class="msg" id="adminMsg" aria-live="polite"></p>
+    </div>
+    <p class="note" id="dbNote" hidden>Claims are not being saved in this view. They disappear when you close the page, so write them down.</p>
+    <p class="note" id="loadNote" hidden></p>
+    <div class="empty" id="emptyClaims"><p>No claims yet. When a player beats the boss, their message arrives on your WhatsApp.</p></div>
+    <ul class="claims" id="claimList"></ul>
+  </div>
+</main>
+
+<script>
+(() => {
+  // ==== SIM START ====
+  // Difficulty settings. Change these to make the boss easier or harder.
+  const C = {
+    version: 1,
+    targetHeight: 50,      // blocks to stack to beat the boss
+    worldWidth: 400,       // game units across
+    blockHeight: 26,
+    startWidth: 170,
+    baseSpeed: 2.4,        // units per tick at the first block (60 ticks per second)
+    speedGain: 0.09,       // extra speed per block stacked
+    maxSpeed: 7.0,
+    perfectTolerance: 3.5, // units off-centre that still counts as perfect
+    streakToGrow: 3,       // perfect drops in a row before the block widens
+    growAmount: 6,
+    minOverlap: 1.5,
+    tickRate: 60
+  };
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function spawn(g) {
+    const top = g.blocks[g.blocks.length - 1];
+    const speed = Math.min(C.maxSpeed, C.baseSpeed + C.speedGain * g.blocks.length) * (0.94 + g.rng() * 0.12);
+    const fromLeft = g.rng() < 0.5;
+    g.cur = { w: top.w, x: fromLeft ? 0 : C.worldWidth - top.w, v: fromLeft ? speed : -speed };
+  }
+
+  function newGame(seed) {
+    const g = {
+      seed, rng: mulberry32(seed), tick: 0, streak: 0, over: false, won: false,
+      blocks: [{ x: (C.worldWidth - C.startWidth) / 2, w: C.startWidth }],
+      taps: [], cur: null, lastPiece: null
+    };
+    spawn(g);
+    return g;
+  }
+
+  function score(g) { return g.blocks.length - 1; }
+
+  function step(g) {
+    if (g.over) return;
+    g.tick++;
+    const c = g.cur, W = C.worldWidth;
+    c.x += c.v;
+    if (c.x < 0) { c.x = -c.x; c.v = -c.v; }
+    else if (c.x + c.w > W) { c.x = 2 * (W - c.w) - c.x; c.v = -c.v; }
+  }
+
+  // Drop the moving block. Returns what happened.
+  function tap(g) {
+    if (g.over) return null;
+    g.taps.push(g.tick);
+    const top = g.blocks[g.blocks.length - 1], c = g.cur;
+    const left = Math.max(c.x, top.x), right = Math.min(c.x + c.w, top.x + top.w);
+    const overlap = right - left;
+    g.lastPiece = null;
+    if (overlap < C.minOverlap) {
+      g.over = true; g.won = false;
+      g.lastPiece = { x: c.x, w: c.w, vx: c.v * 0.3 };
+      return { miss: true };
+    }
+    let block, perfect = false;
+    if (Math.abs(c.x - top.x) <= C.perfectTolerance) {
+      perfect = true;
+      g.streak++;
+      block = { x: top.x, w: top.w };
+      if (g.streak >= C.streakToGrow) {
+        const w = Math.min(C.startWidth, top.w + C.growAmount);
+        block = { x: Math.max(0, Math.min(C.worldWidth - w, top.x - (w - top.w) / 2)), w };
+      }
+    } else {
+      g.streak = 0;
+      block = { x: left, w: overlap };
+      if (c.x < top.x) g.lastPiece = { x: c.x, w: top.x - c.x, vx: -0.6 };
+      else g.lastPiece = { x: top.x + top.w, w: (c.x + c.w) - (top.x + top.w), vx: 0.6 };
+    }
+    g.blocks.push(block);
+    if (score(g) >= C.targetHeight) { g.over = true; g.won = true; return { win: true, perfect }; }
+    spawn(g);
+    return { perfect };
+  }
+
+  // Re-run a recorded round from its seed and tap ticks. The owner page uses this to check a claimed win.
+  function replay(run) {
+    const g = newGame(run.seed);
+    let drops = 0, perfects = 0;
+    for (const t of run.taps) {
+      while (g.tick < t && !g.over) step(g);
+      if (g.over) break;
+      const r = tap(g);
+      drops++;
+      if (r && r.perfect) perfects++;
+    }
+    return { score: score(g), won: g.won, ticks: g.tick, drops, perfects };
+  }
+  // ==== SIM END ====
+
+  // ---- prize and claim settings
+  const PRIZE = 100;            // naira paid for beating the boss
+  const OWNER_WHATSAPP = '2348134154344';    // owner's number for claims, international format without +
+  const FAST_SECONDS = 30;      // owner page flags rounds shorter than this
+  const PERFECT_FLAG = 0.7;     // owner page flags rounds with a higher share of perfect drops
+
+  window.StackRush = { config: C, lastRun: null, replay };
+
+  const $ = (id) => document.getElementById(id);
+  const stage = $('stage'), cv = $('cv'), ctx = cv.getContext('2d');
+  const gameView = $('gameView'), adminView = $('adminView');
+  const overlay = $('overlay'), ovChip = $('ovChip'), ovTitle = $('ovTitle'), ovText = $('ovText');
+  const startBtn = $('startBtn'), shareBtn = $('shareBtn'), claimBox = $('claimBox');
+  const claimName = $('claimName'), claimPhone = $('claimPhone');
+  const ovQuote = $('ovQuote'), tipEl = $('tip');
+  let endLine = '';
+  let installEvt = null;
+  const installBtn = $('installBtn');
+  try { if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone) tipEl.remove(); } catch (e) {}
+  const claimLink = $('claimLink'), copyBtn = $('copyBtn'), openClaimBtn = $('openClaimBtn'), doneBtn = $('doneBtn');
+  const scoreEl = $('score'), meterFill = $('meterFill'), meterEl = $('meter'), tauntEl = $('taunt'), faceEl = $('face');
+  const BH = C.blockHeight, W = C.worldWidth;
+  const naira = (n) => '₦' + n.toLocaleString();
+
+  $('targetLbl').textContent = '/ ' + C.targetHeight;
+  meterEl.setAttribute('aria-valuemax', C.targetHeight);
+  openClaimBtn.textContent = 'Claim your ' + naira(PRIZE);
+  $('ovChip').textContent = 'Free to play · Win ' + naira(PRIZE);
+  $('sheetGoal').textContent = 'You are the young builder who wants his contract. Stack ' + C.targetHeight + ' blocks to the boss line and it is yours.';
+  $('sheetPrize').textContent = 'Prize: ' + naira(PRIZE) + ', paid after your win is checked.';
+
+  // ---- claim codes: a won round packed into text a player can send on WhatsApp
+  function fnv(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return h.toString(36);
+  }
+  function toB64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = ''; bytes.forEach((b) => { bin += String.fromCharCode(b); });
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function fromB64(s) {
+    s = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    const bin = atob(s);
+    return new TextDecoder().decode(Uint8Array.from(bin, (ch) => ch.charCodeAt(0)));
+  }
+  function encodeClaim(c) {
+    let prev = 0; const deltas = [];
+    for (const t of c.taps) { deltas.push(t - prev); prev = t; }
+    const json = JSON.stringify({ v: 1, s: c.seed, d: deltas.join('.'), n: c.name, p: c.phone, a: c.at });
+    return toB64(json) + '.' + fnv(json);
+  }
+  function decodeClaim(text) {
+    const m = /Code:\s*([\s\S]+)$/i.exec(text);
+    const raw = (m ? m[1] : text).replace(/\s+/g, '');
+    const i = raw.lastIndexOf('.');
+    if (i < 1) return { error: 'This does not look like a win message. Paste the whole message, including the Code line.' };
+    let json;
+    try { json = fromB64(raw.slice(0, i)); } catch (e) { return { error: 'The code is damaged. Ask the player to send it again.' }; }
+    if (fnv(json) !== raw.slice(i + 1)) return { error: 'The code is damaged or was changed. Ask the player to send it again.' };
+    let o;
+    try { o = JSON.parse(json); } catch (e) { return { error: 'The code is damaged. Ask the player to send it again.' }; }
+    if (!o || o.v !== 1 || !Number.isInteger(o.s) || typeof o.d !== 'string') return { error: 'This code is from a version of the game this page does not know.' };
+    const deltas = o.d ? o.d.split('.').map(Number) : [];
+    if (!deltas.length || deltas.length > 400 || deltas.some((x) => !Number.isInteger(x) || x < 0 || x > 100000)) return { error: 'The tap record in this code is not valid.' };
+    let t = 0; const taps = deltas.map((x) => (t += x));
+    if (t > 2000000) return { error: 'The tap record in this code is not valid.' };
+    return { claim: {
+      seed: o.s, taps,
+      name: String(o.n || '').slice(0, 40),
+      phone: String(o.p || '').replace(/[^\d+]/g, '').slice(0, 16),
+      at: Number(o.a) || 0
+    } };
+  }
+  function waNumber(p) {
+    let d = String(p || '').replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '0') d = '234' + d.slice(1);
+    return d;
+  }
+
+  // ---- stats kept on this phone (use them to tune difficulty with test players)
+  const KEY = 'stackrush.stats.v1', WIN_KEY = 'stackrush.win.v1';
+  let stats = { played: 0, wins: 0, best: 0 };
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && typeof s.played === 'number') stats = s;
+  } catch (e) {}
+  function saveStats() { try { localStorage.setItem(KEY, JSON.stringify(stats)); } catch (e) {} }
+  function showStats() {
+    $('stRounds').textContent = stats.played;
+    $('stBest').textContent = stats.best;
+    $('stWins').textContent = stats.wins;
+    $('stRate').textContent = stats.played ? Math.round(stats.wins / stats.played * 100) + '%' : '0%';
+  }
+  // A win is kept on the phone until the player says it was sent, so closing the page does not lose it.
+  function loadSavedWin() {
+    try {
+      const w = JSON.parse(localStorage.getItem(WIN_KEY));
+      if (w && Array.isArray(w.taps) && Number.isInteger(w.seed) && replay(w).won) return w;
+    } catch (e) {}
+    return null;
+  }
+  function saveWin(w) { try { localStorage.setItem(WIN_KEY, JSON.stringify(w)); } catch (e) {} }
+  function clearWin() { try { localStorage.removeItem(WIN_KEY); } catch (e) {} }
+  let savedWin = loadSavedWin(), activeWin = null;
+
+  // ---- sound
+  let actx = null, muted = false;
+  function beep(freq, dur, type, vol) {
+    if (muted) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(), gn = actx.createGain();
+      o.type = type || 'triangle'; o.frequency.value = freq;
+      gn.gain.setValueAtTime(vol || 0.07, actx.currentTime);
+      gn.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+      o.connect(gn); gn.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
+    } catch (e) {}
+  }
+  $('mute').addEventListener('pointerdown', (e) => e.stopPropagation());
+  $('mute').addEventListener('click', (e) => {
+    muted = !muted;
+    e.currentTarget.textContent = muted ? 'Sound off' : 'Sound on';
+    e.currentTarget.setAttribute('aria-pressed', String(muted));
+  });
+
+  // ---- Oga Contractor's taunts. Each band starts at the block count shown; a new line is picked on every stack.
+  const TAUNTS = [
+    [0, [
+      'Oya, you come for my contract? Show me wetin you get.',
+      'Na my name dey that signboard. Build.',
+      'Another young builder wey wan take my job.',
+      'Contract no be gift. Earn am.'
+    ]],
+    [8, [
+      'Many don come before you. All of them don go.',
+      'My workers don stack pass this one.',
+      'Cement never dry yet, no celebrate.',
+      'Your CV no impress me yet.'
+    ]],
+    [18, [
+      'Your hand don start to shake? Contract is heavy.',
+      'My foreman wan laugh.',
+      'Abeg, build straight. This no be bamboo house.',
+      'Even my apprentice no dey slow like this.'
+    ]],
+    [28, [
+      'Haba, you reach here? Who recommended you?',
+      'This height na for real contractors.',
+      'Wind don start to blow. You ready?',
+      'Why my chest dey beat like this?'
+    ]],
+    [38, [
+      'This one no suppose happen. Not my tower!',
+      'Abeg, no shake my site.',
+      'I never see steady hand like this.',
+      'Shey you wan collect my contract for real?'
+    ]],
+    [46, [
+      "Wait! Don't drop that last block!",
+      'Please, we fit talk. I go share the contract!',
+      'Ah! My name go leave that signboard!',
+      'Just miss one, abeg. One!'
+    ]]
+  ];
+  const PERFECT_TAUNTS = ['Lucky hand!', 'Ehn? That one clean.', 'Hmm. Foreman material.', 'Show-off. Do am again.'];
+  const MISS_TAUNTS = [
+    'Na so e go be. Contract still dey my hand.',
+    'Ha! Your block no fit hold.',
+    'Your foundation don crack. Again?',
+    'Pay for the damage!',
+    'Even my apprentice go do better.'
+  ];
+  const WIN_TAUNTS = ['You win. Take the contract.', 'Ahh! My tower don fall!', 'Okay. Today na your day, contractor.'];
+  let lastTaunt = '';
+  function pick(list) {
+    let t, tries = 0;
+    do { t = list[Math.floor(Math.random() * list.length)]; tries++; } while (t === lastTaunt && list.length > 1 && tries < 8);
+    lastTaunt = t;
+    return t;
+  }
+  function tauntFor(n) { let band = TAUNTS[0][1]; for (const [k, list] of TAUNTS) if (n >= k) band = list; return pick(band); }
+
+  // Show a line in the speech bubble, pop it in, and chirp.
+  function say(text, delay) {
+    const bubble = $('bubble');
+    tauntEl.textContent = text;
+    bubble.hidden = false;
+    bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop');
+    setTimeout(() => {
+      beep(392, 0.06, 'square', 0.035);
+      setTimeout(() => beep(523, 0.09, 'square', 0.035), 70);
+    }, delay == null ? 90 : delay);
+  }
+
+  // ---- game state and view
+  let g = demoGame(), state = 'ready', pending = false, paused = false;
+  let camY = 0, dpr = 1, cw = 0, ch = 0, S = 1, viewH = 700;
+  let pieces = [], popups = [], flash = 0, last = 0, acc = 0;
+
+  function demoGame() {
+    const d = newGame((Math.random() * 4294967296) >>> 0);
+    for (let i = 0; i < 7; i++) {
+      const p = d.blocks[d.blocks.length - 1];
+      const w = Math.max(120, p.w - d.rng() * 8);
+      const x = Math.max(0, Math.min(W - w, p.x + (d.rng() - 0.5) * 12));
+      d.blocks.push({ x, w });
+    }
+    spawn(d);
+    return d;
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 3);
+    cw = stage.clientWidth; ch = stage.clientHeight;
+    if (!cw || !ch) return;
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+    S = cw / W; viewH = ch / S;
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  window.addEventListener('resize', resize);
+  resize();
+
+  function setHud(n) {
+    scoreEl.textContent = n;
+    meterFill.style.width = Math.min(100, n / C.targetHeight * 100) + '%';
+    meterEl.setAttribute('aria-valuenow', n);
+    if (n === 0 || n % 2 === 0) say(tauntFor(n), n === 0 ? 0 : 90);
+    faceEl.classList.toggle('worried', n >= C.targetHeight * 0.8);
+  }
+
+  // ---- overlay screens: start, lose, claim
+  function showOverlay(mode) {
+    const claim = mode === 'claim';
+    ovChip.hidden = claim;
+    claimBox.hidden = !claim;
+    ovQuote.hidden = mode === 'start' || !endLine;
+    ovQuote.textContent = endLine ? '“' + endLine + '”' : '';
+    if (tipEl) tipEl.hidden = mode !== 'start';
+    installBtn.hidden = !(installEvt && mode === 'start');
+    $('bubble').hidden = true;
+    claimLink.hidden = !claim; copyBtn.hidden = !claim; doneBtn.hidden = !claim;
+    shareBtn.hidden = mode !== 'lose';
+    openClaimBtn.hidden = claim || !savedWin;
+    startBtn.className = claim ? 'btn ghost' : 'btn';
+    if (mode === 'start') {
+      ovTitle.textContent = 'Stack Rush';
+      ovText.textContent = 'Tap to drop each block. Stack ' + C.targetHeight + ' to beat Oga Contractor and win ' + naira(PRIZE) + '.';
+      startBtn.textContent = 'Start';
+    } else if (mode === 'lose') {
+      startBtn.textContent = 'Play again';
+    } else {
+      ovTitle.textContent = 'Boss beaten';
+      ovText.textContent = 'You stacked all ' + C.targetHeight + ' blocks. Add your details to claim your ' + naira(PRIZE) + '.';
+      startBtn.textContent = 'Play again';
+      refreshClaim();
+    }
+    overlay.hidden = false;
+    overlay.scrollTop = 0;
+  }
+
+  function currentClaimMsg() {
+    if (!activeWin) return null;
+    const name = claimName.value.trim(), phone = claimPhone.value.replace(/[^\d+]/g, '');
+    if (name.length < 2 || phone.replace(/\D/g, '').length < 10) return null;
+    const code = encodeClaim({ seed: activeWin.seed, taps: activeWin.taps, name, phone, at: activeWin.at });
+    return 'Stack Rush win claim\nName: ' + name + '\nPhone: ' + phone + '\nBlocks: ' + activeWin.score + '\nCode: ' + code;
+  }
+  function refreshClaim() {
+    const msg = currentClaimMsg();
+    claimLink.setAttribute('aria-disabled', msg ? 'false' : 'true');
+    claimLink.href = msg ? 'https://wa.me/' + OWNER_WHATSAPP + '?text=' + encodeURIComponent(msg) : '#';
+    copyBtn.disabled = !msg;
+  }
+  claimName.addEventListener('input', refreshClaim);
+  claimPhone.addEventListener('input', refreshClaim);
+  claimBox.addEventListener('submit', (e) => e.preventDefault());
+  claimLink.addEventListener('click', (e) => { if (claimLink.getAttribute('aria-disabled') === 'true') e.preventDefault(); });
+  copyBtn.addEventListener('click', async () => {
+    const msg = currentClaimMsg();
+    if (!msg) return;
+    let label = 'Copied';
+    try { await navigator.clipboard.writeText(msg); } catch (e) { label = 'Copy not available'; }
+    copyBtn.textContent = label;
+    setTimeout(() => { copyBtn.textContent = 'Copy claim'; }, 1800);
+  });
+  openClaimBtn.addEventListener('click', () => { activeWin = savedWin; showOverlay('claim'); });
+  doneBtn.addEventListener('click', () => { clearWin(); savedWin = null; activeWin = null; showOverlay('start'); });
+
+  function start() {
+    g = newGame((Math.random() * 4294967296) >>> 0);
+    state = 'playing'; pending = false; camY = 0; pieces = []; popups = []; flash = 0;
+    overlay.hidden = true;
+    endLine = '';
+    setHud(0);
+  }
+
+  function finish() {
+    state = 'over';
+    const n = score(g), won = g.won;
+    stats.played++; if (won) stats.wins++; if (n > stats.best) stats.best = n;
+    saveStats(); showStats();
+    window.StackRush.lastRun = { version: C.version, seed: g.seed, taps: g.taps.slice(), score: n, won };
+    if (won) {
+      activeWin = { seed: g.seed, taps: g.taps.slice(), at: Date.now(), score: n };
+      saveWin(activeWin); savedWin = activeWin;
+      endLine = pick(WIN_TAUNTS); say(endLine, 250);
+      [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.16, 'triangle', 0.08), i * 110));
+    } else {
+      endLine = pick(MISS_TAUNTS); say(endLine, 250);
+      faceEl.classList.remove('shake'); void faceEl.getBoundingClientRect(); faceEl.classList.add('shake');
+      beep(110, 0.3, 'sawtooth', 0.06);
+    }
+    setTimeout(() => {
+      if (won) { showOverlay('claim'); return; }
+      ovTitle.textContent = 'Fell at ' + n;
+      ovText.textContent = (C.targetHeight - n) + ' more to reach the boss. Your best is ' + stats.best + '.';
+      const msg = 'I stacked ' + n + ' blocks on Stack Rush. Can you beat ' + n + '? ' + location.href;
+      shareBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+      showOverlay('lose');
+    }, won ? 700 : 550);
+  }
+
+  function doTap() {
+    const r = tap(g);
+    if (!r) return;
+    const n = score(g);
+    if (g.lastPiece) {
+      const idx = g.blocks.length - (r.miss ? 0 : 1);
+      pieces.push({ x: g.lastPiece.x, w: g.lastPiece.w, vx: g.lastPiece.vx, i: idx, wy: idx * BH, fy: 0, vy: 0 });
+    }
+    if (r.miss) { finish(); return; }
+    setHud(n);
+    if (r.perfect) {
+      flash = 1;
+      if (Math.random() < 0.4) say(pick(PERFECT_TAUNTS));
+      popups.push({ text: g.streak > 1 ? 'PERFECT ×' + g.streak : 'PERFECT', age: 0 });
+      beep(620 + Math.min(g.streak, 8) * 60, 0.12, 'triangle', 0.08);
+    } else {
+      beep(200 + n * 7, 0.07, 'triangle', 0.07);
+    }
+    if (r.win) finish();
+  }
+
+  // ---- input
+  stage.addEventListener('pointerdown', (e) => { if (state === 'playing' && !paused) { e.preventDefault(); pending = true; } });
+  window.addEventListener('keydown', (e) => {
+    if (state === 'playing' && !paused && !gameView.hidden && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); pending = true; }
+    if (e.key === 'Escape' && !sheet.hidden) closeSheet();
+  });
+  startBtn.addEventListener('click', start);
+
+  // ---- boss card
+  const sheet = $('sheet'), sheetClose = $('sheetClose');
+  function openSheet() { paused = true; pending = false; sheet.hidden = false; sheetClose.focus(); }
+  function closeSheet() { sheet.hidden = true; paused = false; acc = 0; if (document.activeElement) document.activeElement.blur(); }
+  $('bossBtn').addEventListener('click', openSheet);
+  sheetClose.addEventListener('click', closeSheet);
+  sheet.addEventListener('pointerdown', (e) => { if (e.target === sheet) closeSheet(); });
+
+  // ---- drawing
+  const sy = (wy) => viewH - 64 - (wy - camY);
+  const hue = (i) => (210 + i * 6) % 360;
+
+  function drawBlock(x, w, i, wy, dy) {
+    const y = sy(wy + BH) + (dy || 0);
+    ctx.fillStyle = 'hsl(' + hue(i) + ' 72% 56%)';
+    ctx.fillRect(x, y, w, BH - 2);
+    ctx.fillStyle = 'rgba(255,255,255,.24)';
+    ctx.fillRect(x, y, w, 5);
+    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    ctx.fillRect(x, y + BH - 9, w, 7);
+  }
+
+  function draw() {
+    ctx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);
+    ctx.clearRect(0, 0, W, viewH);
+
+    // height ruler every 10 blocks, with the boss line at the target
+    ctx.textBaseline = 'bottom';
+    for (let m = 10; m <= C.targetHeight; m += 10) {
+      const y = sy((m + 1) * BH);
+      if (y < -20 || y > viewH + 20) continue;
+      const boss = m === C.targetHeight;
+      ctx.setLineDash(boss ? [10, 6] : [4, 8]);
+      ctx.lineWidth = boss ? 2.5 : 1;
+      ctx.strokeStyle = boss ? '#ffb02e' : 'rgba(162,168,217,.28)';
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = '700 ' + (boss ? 13 : 11) + 'px "DM Sans", system-ui, sans-serif';
+      ctx.fillStyle = boss ? '#ffb02e' : 'rgba(162,168,217,.7)';
+      ctx.textAlign = boss ? 'right' : 'left';
+      ctx.fillText(boss ? 'BOSS LINE · ' + m : String(m), boss ? W - 8 : 8, y - 4);
+    }
+
+    // ground
+    const gy = sy(0);
+    if (gy < viewH + 40) { ctx.fillStyle = '#242864'; ctx.fillRect(0, gy, W, 60); }
+
+    // placed blocks
+    const first = Math.max(0, Math.floor((camY - 40) / BH) - 1);
+    for (let i = first; i < g.blocks.length; i++) {
+      const y = sy((i + 1) * BH);
+      if (y > viewH + BH) continue;
+      if (y < -BH) break;
+      drawBlock(g.blocks[i].x, g.blocks[i].w, i, i * BH);
+    }
+    if (flash > 0 && g.blocks.length > 1) {
+      const b = g.blocks[g.blocks.length - 1], y = sy(g.blocks.length * BH);
+      ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.6).toFixed(2) + ')';
+      ctx.fillRect(b.x, y, b.w, BH - 2);
+    }
+
+    // falling slices
+    for (const p of pieces) drawBlock(p.x, p.w, p.i, p.wy, p.fy);
+
+    // moving block
+    if (!g.over) drawBlock(g.cur.x, g.cur.w, g.blocks.length, g.blocks.length * BH);
+
+    // popups
+    for (const p of popups) {
+      ctx.globalAlpha = Math.max(0, 1 - p.age / 40);
+      ctx.font = '800 22px "Bricolage Grotesque", "Arial Black", system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffb02e';
+      ctx.fillText(p.text, W / 2, viewH * 0.3 - p.age * 0.6);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ---- main loop: fixed 60 ticks per second so a round can be replayed exactly
+  const TICK = 1000 / C.tickRate;
+  function frame(ts) {
+    const dt = Math.min(100, last ? ts - last : 16);
+    last = ts;
+    if (gameView.hidden || paused || !cw) { acc = 0; requestAnimationFrame(frame); return; }
+    acc += dt;
+    if (state === 'playing' && pending && !g.over) doTap();
+    pending = false;
+    while (acc >= TICK) { acc -= TICK; if (!g.over) step(g); }
+
+    const target = Math.max(0, g.blocks.length * BH - viewH * 0.5);
+    camY += (target - camY) * 0.14;
+    for (const p of pieces) { p.vy += 0.55; p.fy += p.vy; p.x += p.vx; }
+    pieces = pieces.filter((p) => p.fy < viewH + 300);
+    for (const p of popups) p.age++;
+    popups = popups.filter((p) => p.age < 40);
+    flash = Math.max(0, flash - 0.08);
+
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  // ---- owner page (#admin): paste a win message, the round is replayed, then confirm and mark paid
+  const STATUS_LABEL = { pending: 'Pending', confirmed: 'Confirmed', paid: 'Paid', rejected: 'Rejected' };
+  let adminStarted = false, claims = [];
+  const CLAIMS_KEY = 'stackrush.claims.v1';
+  function saveClaims() {
+    try { localStorage.setItem(CLAIMS_KEY, JSON.stringify(claims)); return true; }
+    catch (e) { $('dbNote').hidden = false; return false; }
+  }
+
+  function h(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fmtDate(ms) {
+    if (!ms) return 'unknown time';
+    try { return new Date(ms).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return 'unknown time'; }
+  }
+  function setMsg(text, kind) { const m = $('adminMsg'); m.textContent = text || ''; m.className = 'msg' + (kind ? ' ' + kind : ''); }
+
+  async function addClaim(doc) {
+    if (claims.some((c) => c.id === doc.id)) return false;
+    claims.unshift(doc); saveClaims(); renderClaims();
+    return true;
+  }
+  async function setStatus(c, status) {
+    Object.assign(c, { status, updatedAt: Date.now() });
+    saveClaims(); renderClaims();
+  }
+
+  function claimCard(c, phoneCount) {
+    const li = h('li', 'claim');
+    const top = h('div', 'row');
+    top.appendChild(h('strong', 'cname', c.name || 'No name given'));
+    top.appendChild(h('span', 'pill ' + c.status, STATUS_LABEL[c.status] || String(c.status)));
+    li.appendChild(top);
+
+    const wa = waNumber(c.phone);
+    const contact = h('div', 'row');
+    contact.appendChild(h('span', 'phone', c.phone || 'No number given'));
+    if (wa.length >= 10) {
+      const a = h('a', 'link', 'Open WhatsApp chat');
+      a.href = 'https://wa.me/' + wa; a.target = '_blank'; a.rel = 'noopener';
+      contact.appendChild(a);
+    }
+    li.appendChild(contact);
+
+    const secs = Math.round((c.ticks || 0) / C.tickRate);
+    li.appendChild(h('p', 'meta', c.score + ' blocks · round of ' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') + ' · ' + (c.perfects || 0) + ' perfect drops · claimed ' + fmtDate(c.claimedAt)));
+
+    const flags = (c.flags || []).slice();
+    if (wa && phoneCount[wa] > 1) flags.push('This number has ' + phoneCount[wa] + ' claims');
+    const fl = h('div', 'flags');
+    if (flags.length) flags.forEach((f) => fl.appendChild(h('span', 'flag', f)));
+    else fl.appendChild(h('span', 'flag clear', 'Round replayed, no flags'));
+    li.appendChild(fl);
+
+    const btns = h('div', 'btns');
+    const act = (label, cls, status) => {
+      const b = h('button', 'sbtn' + (cls ? ' ' + cls : ''), label);
+      b.type = 'button';
+      b.addEventListener('click', async () => {
+        b.disabled = true;
+        try { await setStatus(c, status); } catch (e) { setMsg('That change was not saved. Try again.', 'err'); b.disabled = false; }
+      });
+      btns.appendChild(b);
+    };
+    if (c.status === 'pending') { act('Confirm win', 'primary', 'confirmed'); act('Reject', 'danger', 'rejected'); }
+    else if (c.status === 'confirmed') { act('Mark as paid', 'primary', 'paid'); act('Move back to pending', '', 'pending'); }
+    else if (c.status === 'rejected') { act('Move back to pending', '', 'pending'); }
+    if (btns.childNodes.length) li.appendChild(btns);
+    return li;
+  }
+
+  function renderClaims() {
+    const list = $('claimList'); list.textContent = '';
+    const phoneCount = {};
+    claims.forEach((c) => { const k = waNumber(c.phone); if (k) phoneCount[k] = (phoneCount[k] || 0) + 1; });
+    const order = { pending: 0, confirmed: 1, paid: 2, rejected: 3 };
+    const sorted = claims.slice().sort((a, b) => ((order[a.status] ?? 9) - (order[b.status] ?? 9)) || ((b.addedAt || 0) - (a.addedAt || 0)));
+    let np = 0, nc = 0, npaid = 0;
+    sorted.forEach((c) => {
+      if (c.status === 'pending') np++; else if (c.status === 'confirmed') nc++; else if (c.status === 'paid') npaid++;
+      list.appendChild(claimCard(c, phoneCount));
+    });
+    $('tPending').textContent = np;
+    $('tToPay').textContent = naira(nc * PRIZE);
+    $('tToPayN').textContent = nc + (nc === 1 ? ' win' : ' wins');
+    $('tPaid').textContent = naira(npaid * PRIZE);
+    $('tPaidN').textContent = npaid + (npaid === 1 ? ' win' : ' wins');
+    $('emptyClaims').hidden = claims.length > 0;
+  }
+
+  $('checkBtn').addEventListener('click', async () => {
+    setMsg('');
+    const res = decodeClaim($('pasteBox').value);
+    if (res.error) { setMsg(res.error, 'err'); return; }
+    const c = res.claim, out = replay(c);
+    if (!out.won) { setMsg('This round does not replay to a win. Do not pay it.', 'err'); return; }
+    const secs = Math.round(out.ticks / C.tickRate), flags = [];
+    if (secs < FAST_SECONDS) flags.push('Round took only ' + secs + ' seconds, which is faster than most people can play');
+    if (out.drops && out.perfects / out.drops >= PERFECT_FLAG) flags.push(Math.round(out.perfects / out.drops * 100) + '% of drops were perfect, which is unusual');
+    if (c.taps.length > out.drops) flags.push('The code has extra taps after the win');
+    const doc = {
+      id: 'c' + c.seed, name: c.name, phone: c.phone, seed: c.seed, taps: c.taps,
+      score: out.score, ticks: out.ticks, drops: out.drops, perfects: out.perfects, flags,
+      status: 'pending', claimedAt: c.at, addedAt: Date.now()
+    };
+    try {
+      const added = await addClaim(doc);
+      if (!added) { setMsg('This win is already in the list.', 'err'); return; }
+      $('pasteBox').value = '';
+      setMsg(flags.length ? 'Added as pending. It has flags, read them before you confirm.' : 'Added as pending. The round replays to a real win.', 'ok');
+    } catch (e) {
+      setMsg('Could not save this claim. Try again.', 'err');
+    }
+  });
+
+  function startAdmin() {
+    if (adminStarted) return;
+    adminStarted = true;
+    $('adminTools').hidden = false;
+    try {
+      const saved = JSON.parse(localStorage.getItem(CLAIMS_KEY));
+      if (Array.isArray(saved)) claims = saved.filter((c) => c && typeof c.id === 'string');
+    } catch (e) {}
+    renderClaims();
+  }
+
+  // ---- routing: #admin shows the owner page, anything else shows the game
+  function route() {
+    const admin = location.hash === '#admin';
+    gameView.hidden = admin; adminView.hidden = !admin;
+    if (admin) startAdmin();
+  }
+  window.addEventListener('hashchange', route);
+
+  // ---- install button (Android Chrome) and offline support
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); installEvt = e;
+    if (state === 'ready') installBtn.hidden = false;
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    try { await installEvt.userChoice; } catch (e) {}
+    installEvt = null; installBtn.hidden = true;
+  });
+  window.addEventListener('appinstalled', () => {
+    installEvt = null; installBtn.hidden = true;
+    if (tipEl) tipEl.remove();
+  });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+
+  showStats();
+  showOverlay('start');
+  tauntEl.textContent = TAUNTS[0][1][0];
+  route();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
