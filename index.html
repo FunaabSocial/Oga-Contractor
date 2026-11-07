@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#12142b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Stack Rush">
+<meta name="apple-mobile-web-app-title" content="Oga Contractor">
 <meta name="description" content="Stack 50 blocks and beat Oga Contractor.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Stack Rush</title>
+<title>Oga Contractor</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   /* Layout: one-column phone game. Boss and score on top, progress meter, tall tower stage, stats strip below.
@@ -210,8 +210,7 @@
   .stats div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
   .stats dt { margin: 0; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .stats dd { margin: 2px 0 0; font-family: var(--font-display); font-weight: 800; font-size: 19px; font-variant-numeric: tabular-nums; }
-  .adminlink { margin: 0; font-size: 13px; text-align: center; }
-  .link { color: var(--info); }
+  .adminlink { margin: 0; font-size: 13px; text-align: center; }  .link { color: var(--info); }
 
   /* boss card */
   .sheet {
@@ -281,6 +280,48 @@
     .overlay, .face.shake, .bubble.pop { animation: none; }
     .meter i { transition: none; }
   }
+
+  /* ---- sign-in, account form, Top 5 board, owner page */
+  .overlay.authov {
+    position: fixed; inset: 0; z-index: 15; background: var(--ink);
+    padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  }
+  .auth-card { width: 100%; max-width: 320px; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+  .auth-card h1 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 10vw, 46px); line-height: 1; text-wrap: balance; }
+  .err { margin: 0; min-height: 1.2em; max-width: 300px; color: var(--hot); font-size: 13px; line-height: 1.4; }
+  .pform { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+  .check { display: flex; align-items: flex-start; gap: 10px; max-width: 300px; text-align: left; font-size: 13px; line-height: 1.4; color: var(--muted); cursor: pointer; }
+  .check input { width: 20px; height: 20px; flex: none; margin: 1px 0 0; accent-color: var(--gold); }
+  .fine.strong { color: var(--text); background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .confirm { width: 100%; max-width: 300px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .confirm p { margin: 0; line-height: 1.4; }
+  .confirm b { font: 800 26px var(--font-display); color: var(--gold); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .winstat { margin: 0; max-width: 30ch; line-height: 1.45; }
+
+  .acct { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .who { color: var(--muted); font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
+  .acct-btns { display: flex; gap: 8px; margin-left: auto; }
+  .mini { font: 700 13px var(--font-body); padding: 9px 13px; border-radius: 9px; border: 1px solid var(--line); background: transparent; color: var(--text); cursor: pointer; }
+  .mini.gold { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  .mini:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+  .board { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .brow { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px; background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .brow.me { border-color: var(--ok); }
+  .brow .rk { font: 800 18px var(--font-display); color: var(--gold); }
+  .brow .nm { font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
+  .brow .bl { font: 800 18px var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .brow .bl small { font: 500 11px var(--font-body); color: var(--muted); margin-left: 4px; }
+  .tag { display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid currentColor; border-radius: 99px; padding: 1px 7px; vertical-align: middle; }
+  .tag.you { color: var(--ok); }
+
+  .admin h2 { margin: 8px 0 0; font: 800 18px var(--font-display); }
+  .tally.two { grid-template-columns: repeat(2, 1fr); }
+  .player { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .player b { overflow-wrap: anywhere; }
+  .player span { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+  .gate-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+
 </style>
 </head>
 <body>
@@ -314,33 +355,60 @@
     <canvas id="cv" aria-label="Tower stacking game"></canvas>
     <button class="mute" id="mute" type="button" aria-pressed="false">Sound on</button>
     <div class="bubble" id="bubble" aria-live="polite" hidden><span id="taunt"></span></div>
-    <div class="overlay" id="overlay">
+    <div class="overlay" id="overlay" hidden>
       <div class="ov-inner">
-        <p class="chip" id="ovChip">Free to play · Win ₦100</p>
-        <h1 id="ovTitle">Stack Rush</h1>
+        <p class="chip" id="ovChip">Free to play · Win ₦123</p>
+        <h1 id="ovTitle">Oga Contractor</h1>
         <p class="quote" id="ovQuote" hidden></p>
         <p class="lead" id="ovText">Tap to drop each block.</p>
-        <form class="claim-form" id="claimBox" hidden>
-          <div class="field"><label for="claimName">Your name</label><input id="claimName" autocomplete="name" maxlength="40"></div>
-          <div class="field"><label for="claimPhone">WhatsApp number</label><input id="claimPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="0801 234 5678"></div>
-          <p class="fine">Send the message as it is, with the code line. Your win is checked before you are paid.</p>
-        </form>
-        <div class="actions">
-          <a class="btn" id="claimLink" href="#" target="_blank" rel="noopener" aria-disabled="true" hidden>Send claim on WhatsApp</a>
-          <button class="btn ghost" id="copyBtn" type="button" hidden>Copy claim</button>
-        </div>
+        <p class="winstat" id="winStatus" hidden></p>
+        <p class="fine" id="myWins" hidden></p>
         <div class="actions">
           <button class="btn" id="startBtn" type="button">Start</button>
-          <button class="btn ghost" id="openClaimBtn" type="button" hidden>Claim your ₦100</button>
+          <button class="btn ghost" id="retryWinBtn" type="button" hidden>Try saving again</button>
           <button class="btn ghost" id="installBtn" type="button" hidden>Install app</button>
           <a class="btn ghost" id="shareBtn" href="#" target="_blank" rel="noopener" hidden>Share on WhatsApp</a>
-          <button class="btn ghost" id="doneBtn" type="button" hidden>I sent it</button>
         </div>
         <details class="tip" id="tip">
           <summary>Add this game to your home screen</summary>
           <p><b>Android (Chrome):</b> tap the three dots, then Add to Home screen.</p>
           <p><b>iPhone (Safari):</b> tap Share, then Add to Home Screen.</p>
         </details>
+      </div>
+    </div>
+
+    <div class="overlay authov" id="authOv">
+      <div class="auth-card">
+        <p class="chip" id="authChip">Free to play · Win ₦123</p>
+        <h1 id="authTitle">Oga Contractor</h1>
+        <p class="lead" id="authText">Loading…</p>
+        <p class="err" id="authErr" role="alert"></p>
+        <div class="actions">
+          <button class="btn" id="googleBtn" type="button" hidden>Sign in with Google</button>
+          <button class="btn" id="retryBtn" type="button" hidden>Try again</button>
+          <button class="btn ghost" id="authBoardBtn" type="button" hidden>See the Top 5</button>
+        </div>
+        <form class="pform" id="profileForm" hidden novalidate>
+          <div class="field"><label for="pfName">Your name</label><input id="pfName" autocomplete="name" maxlength="40"></div>
+          <div class="field"><label for="pfPhone">Phone number</label><input id="pfPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="18" placeholder="0801 234 5678"></div>
+          <p class="fine strong" id="pfWarn">Use the number where you want your prize. If you win, we will send the airtime to this exact number. Check it carefully, because we can't send it to a different number later.</p>
+          <div class="field"><label for="pfPhone2">Type the number again</label><input id="pfPhone2" type="tel" inputmode="tel" autocomplete="off" maxlength="18" placeholder="0801 234 5678"></div>
+          <label class="check"><input type="checkbox" id="pfConsent"><span>I agree that Oga Contractor saves my name, Gmail and phone number to run the game and send prizes.</span></label>
+          <p class="err" id="pfErr" role="alert"></p>
+          <button class="btn" id="pfContinue" type="submit">Continue</button>
+        </form>
+        <div class="confirm" id="pfConfirm" hidden>
+          <p id="pfConfirmTop">We will send airtime to</p>
+          <b id="pfConfirmNum"></b>
+          <p>Is that the right number?</p>
+          <div class="actions">
+            <button class="btn" id="pfSave" type="button">Yes, save</button>
+            <button class="btn ghost" id="pfBack" type="button">Change</button>
+          </div>
+          <p class="err" id="pfSaveErr" role="alert"></p>
+        </div>
+        <button class="btn ghost" id="authSignOut" type="button" hidden>Use a different Google account</button>
+        <p class="fine" id="authFine" hidden>We save your name, Gmail and phone number to run the game and send prizes.</p>
       </div>
     </div>
   </div>
@@ -351,8 +419,15 @@
     <div><dt>Boss beaten</dt><dd id="stWins">0</dd></div>
     <div><dt>Win rate</dt><dd id="stRate">0%</dd></div>
   </dl>
-  
+  <div class="acct">
+    <span class="who" id="who"></span>
+    <span class="acct-btns">
+      <button class="mini gold" id="boardBtn" type="button">Top 5 this week</button>
+      <button class="mini" id="signOutBtn" type="button" hidden>Sign out</button>
+    </span>
+  </div>
 </main>
+
 
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
   <div class="card">
@@ -372,38 +447,60 @@
     </div>
     <p>The biggest contractor in town. His name is on the signboard and he says nobody builds better than him.</p>
     <p id="sheetGoal">You are the young builder who wants his contract. Stack 50 blocks to the boss line and it is yours.</p>
-    <p class="prize" id="sheetPrize">Prize: ₦100, paid after your win is checked.</p>
+    <p class="prize" id="sheetPrize">Prize: ₦123, paid after your win is checked.</p>
     <button class="btn" id="sheetClose" type="button">Back to the tower</button>
+  </div>
+</div>
+
+<div class="sheet" id="boardSheet" role="dialog" aria-modal="true" aria-labelledby="boardTitle" hidden>
+  <div class="card">
+    <div>
+      <p class="role">Resets every Sunday</p>
+      <h2 id="boardTitle">Top 5 this week</h2>
+    </div>
+    <ol class="board" id="boardList"></ol>
+    <p class="fine" id="boardMsg"></p>
+    <p class="fine">Oga's workers are computer players. Real players replace them as soon as they stack higher.</p>
+    <button class="btn" id="boardClose" type="button">Close</button>
   </div>
 </div>
 
 <main class="admin" id="adminView" hidden>
   <div class="admin-top">
-    <h1>Win claims</h1>
+    <h1>Owner page</h1>
     <a class="link" href="#">Back to game</a>
   </div>
-  <div id="lockPanel" class="empty" hidden>
-    <p>Only the game owner can see win claims. If that is you, open this page from your own Claude account.</p>
+  <div id="adminGate" class="empty">
+    <p id="gateText">Loading…</p>
+    <div class="gate-btns">
+      <button class="sbtn primary" id="ownerSignIn" type="button" hidden>Sign in with Google</button>
+      <button class="sbtn" id="ownerSignOut" type="button" hidden>Sign out</button>
+    </div>
   </div>
   <div id="adminTools" hidden>
-    <p id="adminIntro">Players send their win to your WhatsApp. Paste the whole message below. The page replays the round and checks it before it is listed. Claims are saved on this phone only, so always open this page in the same browser on the same phone.</p>
+    <dl class="tally two">
+      <div><dt>Players</dt><dd id="tPlayers">0</dd><small>signed up</small></div>
+      <div><dt>Rounds played</dt><dd id="tRounds">0</dd><small>all players</small></div>
+      <div><dt>Boss wins</dt><dd id="tBossWins">0</dd><small id="tRate">0% of rounds</small></div>
+      <div><dt>Wins pending</dt><dd id="tPending">0</dd><small>waiting for you</small></div>
+    </dl>
     <dl class="tally">
-      <div><dt>Pending</dt><dd id="tPending">0</dd><small>waiting for you</small></div>
       <div><dt>To pay</dt><dd id="tToPay">₦0</dd><small id="tToPayN">0 wins</small></div>
       <div><dt>Paid</dt><dd id="tPaid">₦0</dd><small id="tPaidN">0 wins</small></div>
+      <div><dt>Prize</dt><dd id="tPrize">₦123</dd><small>per win</small></div>
     </dl>
-    <div class="paste">
-      <label for="pasteBox">Paste a win message</label>
-      <textarea id="pasteBox" spellcheck="false" placeholder="Stack Rush win claim&#10;Name: ...&#10;Phone: ...&#10;Code: ..."></textarea>
-      <div class="btns"><button class="sbtn primary" id="checkBtn" type="button">Check and add</button></div>
-      <p class="msg" id="adminMsg" aria-live="polite"></p>
-    </div>
-    <p class="note" id="dbNote" hidden>Claims are not being saved in this view. They disappear when you close the page, so write them down.</p>
-    <p class="note" id="loadNote" hidden></p>
-    <div class="empty" id="emptyClaims"><p>No claims yet. When a player beats the boss, their message arrives on your WhatsApp.</p></div>
-    <ul class="claims" id="claimList"></ul>
+    <div class="btns"><button class="sbtn" id="refreshBtn" type="button">Refresh</button></div>
+    <p class="msg" id="adminMsg" aria-live="polite"></p>
+    <h2>Wins to check</h2>
+    <p class="note" id="winsHelp">Each win is replayed here. Only pay a win that says it replays to a real win, then tap Confirm win, send the airtime, and tap Mark as paid.</p>
+    <div class="empty" id="emptyWins"><p>No wins yet. When a player beats the boss, the win appears here.</p></div>
+    <ul class="claims" id="winList"></ul>
+    <h2>Players</h2>
+    <div class="empty" id="emptyPlayers"><p>No players yet.</p></div>
+    <ul class="claims" id="playerList"></ul>
   </div>
 </main>
+
 
 <script>
 (() => {
@@ -511,113 +608,110 @@
   }
   // ==== SIM END ====
 
-  // ---- prize and claim settings
-  const PRIZE = 100;            // naira paid for beating the boss
-  const OWNER_WHATSAPP = '2348134154344';    // owner's number for claims, international format without +
+  // ---- settings
+  const PRIZE = 123;                                   // naira of airtime paid for beating the boss
+  const OWNER_EMAIL = 'odugbebeemmanuel2018@gmail.com'; // only this Google account can open the owner page
   const FAST_SECONDS = 30;      // owner page flags rounds shorter than this
   const PERFECT_FLAG = 0.7;     // owner page flags rounds with a higher share of perfect drops
+  const WORKER_COUNT = 50;      // computer players on the Top 5 board
+  const STATS_KEY = 'stackrush.stats.v1', PENDING_KEY = 'stackrush.pendingwin.v2';
 
   window.StackRush = { config: C, lastRun: null, replay };
 
   const $ = (id) => document.getElementById(id);
   const stage = $('stage'), cv = $('cv'), ctx = cv.getContext('2d');
   const gameView = $('gameView'), adminView = $('adminView');
-  const overlay = $('overlay'), ovChip = $('ovChip'), ovTitle = $('ovTitle'), ovText = $('ovText');
-  const startBtn = $('startBtn'), shareBtn = $('shareBtn'), claimBox = $('claimBox');
-  const claimName = $('claimName'), claimPhone = $('claimPhone');
-  const ovQuote = $('ovQuote'), tipEl = $('tip');
-  let endLine = '';
-  let installEvt = null;
-  const installBtn = $('installBtn');
-  try { if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone) tipEl.remove(); } catch (e) {}
-  const claimLink = $('claimLink'), copyBtn = $('copyBtn'), openClaimBtn = $('openClaimBtn'), doneBtn = $('doneBtn');
+  const overlay = $('overlay'), ovChip = $('ovChip'), ovTitle = $('ovTitle'), ovText = $('ovText'), ovQuote = $('ovQuote');
+  const startBtn = $('startBtn'), shareBtn = $('shareBtn'), installBtn = $('installBtn'), retryWinBtn = $('retryWinBtn');
+  const winStatus = $('winStatus'), myWinsEl = $('myWins'), tipEl = $('tip'), authOv = $('authOv');
   const scoreEl = $('score'), meterFill = $('meterFill'), meterEl = $('meter'), tauntEl = $('taunt'), faceEl = $('face');
   const BH = C.blockHeight, W = C.worldWidth;
-  const naira = (n) => '₦' + n.toLocaleString();
+  const naira = (n) => '₦' + n.toLocaleString('en-US');
+  let installEvt = null, endLine = '';
+  try { if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone) tipEl.remove(); } catch (e) {}
 
   $('targetLbl').textContent = '/ ' + C.targetHeight;
   meterEl.setAttribute('aria-valuemax', C.targetHeight);
-  openClaimBtn.textContent = 'Claim your ' + naira(PRIZE);
   $('ovChip').textContent = 'Free to play · Win ' + naira(PRIZE);
+  $('authChip').textContent = 'Free to play · Win ' + naira(PRIZE);
+  $('tPrize').textContent = naira(PRIZE);
   $('sheetGoal').textContent = 'You are the young builder who wants his contract. Stack ' + C.targetHeight + ' blocks to the boss line and it is yours.';
-  $('sheetPrize').textContent = 'Prize: ' + naira(PRIZE) + ', paid after your win is checked.';
+  $('sheetPrize').textContent = 'Prize: ' + naira(PRIZE) + ' airtime, sent after your win is checked.';
 
-  // ---- claim codes: a won round packed into text a player can send on WhatsApp
-  function fnv(str) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
-    return h.toString(36);
+  // ---- small helpers
+  function h(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
   }
-  function toB64(str) {
-    const bytes = new TextEncoder().encode(str);
-    let bin = ''; bytes.forEach((b) => { bin += String.fromCharCode(b); });
-    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  function fmtDate(ms) {
+    if (!ms) return 'unknown time';
+    try { return new Date(ms).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return 'unknown time'; }
   }
-  function fromB64(s) {
-    s = s.replace(/-/g, '+').replace(/_/g, '/');
-    while (s.length % 4) s += '=';
-    const bin = atob(s);
-    return new TextDecoder().decode(Uint8Array.from(bin, (ch) => ch.charCodeAt(0)));
+  function normPhone(s) {
+    let d = String(s || '').replace(/\D/g, '');
+    if (d.length === 13 && d.slice(0, 3) === '234') d = '0' + d.slice(3);
+    else if (d.length === 10 && /^[789]/.test(d)) d = '0' + d;
+    return /^0[789][01]\d{8}$/.test(d) ? d : null;
   }
-  function encodeClaim(c) {
-    let prev = 0; const deltas = [];
-    for (const t of c.taps) { deltas.push(t - prev); prev = t; }
-    const json = JSON.stringify({ v: 1, s: c.seed, d: deltas.join('.'), n: c.name, p: c.phone, a: c.at });
-    return toB64(json) + '.' + fnv(json);
+  function fmtPhone(d) { d = String(d || ''); return d.length === 11 ? d.slice(0, 4) + ' ' + d.slice(4, 7) + ' ' + d.slice(7) : d; }
+  function boardName(full) {
+    const t = String(full || '').trim().split(/\s+/).map((x) => x.replace(/[^A-Za-zÀ-ɏ'-]/g, '')).filter(Boolean);
+    if (!t.length) return 'Player';
+    let first = t[0].slice(0, 14); first = first.charAt(0).toUpperCase() + first.slice(1);
+    return t.length > 1 ? first + ' ' + t[t.length - 1].charAt(0).toUpperCase() + '.' : first;
   }
-  function decodeClaim(text) {
-    const m = /Code:\s*([\s\S]+)$/i.exec(text);
-    const raw = (m ? m[1] : text).replace(/\s+/g, '');
-    const i = raw.lastIndexOf('.');
-    if (i < 1) return { error: 'This does not look like a win message. Paste the whole message, including the Code line.' };
-    let json;
-    try { json = fromB64(raw.slice(0, i)); } catch (e) { return { error: 'The code is damaged. Ask the player to send it again.' }; }
-    if (fnv(json) !== raw.slice(i + 1)) return { error: 'The code is damaged or was changed. Ask the player to send it again.' };
-    let o;
-    try { o = JSON.parse(json); } catch (e) { return { error: 'The code is damaged. Ask the player to send it again.' }; }
-    if (!o || o.v !== 1 || !Number.isInteger(o.s) || typeof o.d !== 'string') return { error: 'This code is from a version of the game this page does not know.' };
-    const deltas = o.d ? o.d.split('.').map(Number) : [];
-    if (!deltas.length || deltas.length > 400 || deltas.some((x) => !Number.isInteger(x) || x < 0 || x > 100000)) return { error: 'The tap record in this code is not valid.' };
-    let t = 0; const taps = deltas.map((x) => (t += x));
-    if (t > 2000000) return { error: 'The tap record in this code is not valid.' };
-    return { claim: {
-      seed: o.s, taps,
-      name: String(o.n || '').slice(0, 40),
-      phone: String(o.p || '').replace(/[^\d+]/g, '').slice(0, 16),
-      at: Number(o.a) || 0
-    } };
-  }
-  function waNumber(p) {
-    let d = String(p || '').replace(/\D/g, '');
-    if (d.length === 11 && d[0] === '0') d = '234' + d.slice(1);
-    return d;
+  // The tap record of a round, packed as the gaps between taps: "52.61.58..."
+  function encodeTaps(taps) { let prev = 0; const d = []; for (const t of taps) { d.push(t - prev); prev = t; } return d.join('.'); }
+  function decodeTaps(s) {
+    if (typeof s !== 'string' || !s) return null;
+    const parts = s.split('.').map(Number);
+    if (!parts.length || parts.length > 400 || parts.some((x) => !Number.isInteger(x) || x < 0 || x > 100000)) return null;
+    let t = 0; return parts.map((x) => (t += x));
   }
 
-  // ---- stats kept on this phone (use them to tune difficulty with test players)
-  const KEY = 'stackrush.stats.v1', WIN_KEY = 'stackrush.win.v1';
+  // ---- weeks. The board starts fresh every Sunday at midnight Nigerian time (WAT, UTC+1).
+  const WAT = 3600000;
+  function weekInfo(now) {
+    const t = new Date((now == null ? Date.now() : now) + WAT);
+    const startUTC = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() - t.getUTCDay());
+    const s = new Date(startUTC);
+    const key = s.getUTCFullYear() + '-' + String(s.getUTCMonth() + 1).padStart(2, '0') + '-' + String(s.getUTCDate()).padStart(2, '0');
+    return { key, startMs: startUTC - WAT };
+  }
+  // One number that sorts by height first and, for equal heights, by who got there first.
+  function rankFor(best, now) {
+    now = now == null ? Date.now() : now;
+    const secs = Math.max(0, Math.min(9999998, Math.floor((now - weekInfo(now).startMs) / 1000)));
+    return best * 1e7 + (9999999 - secs);
+  }
+  function hashStr(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+
+  // ---- stats kept on this phone
   let stats = { played: 0, wins: 0, best: 0 };
   try {
-    const s = JSON.parse(localStorage.getItem(KEY));
+    const s = JSON.parse(localStorage.getItem(STATS_KEY));
     if (s && typeof s.played === 'number') stats = s;
   } catch (e) {}
-  function saveStats() { try { localStorage.setItem(KEY, JSON.stringify(stats)); } catch (e) {} }
+  function saveStats() { try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch (e) {} }
   function showStats() {
     $('stRounds').textContent = stats.played;
     $('stBest').textContent = stats.best;
     $('stWins').textContent = stats.wins;
     $('stRate').textContent = stats.played ? Math.round(stats.wins / stats.played * 100) + '%' : '0%';
   }
-  // A win is kept on the phone until the player says it was sent, so closing the page does not lose it.
-  function loadSavedWin() {
+
+  // ---- a win waiting to be saved. It stays on the phone until the database has it.
+  function readPending() {
     try {
-      const w = JSON.parse(localStorage.getItem(WIN_KEY));
-      if (w && Array.isArray(w.taps) && Number.isInteger(w.seed) && replay(w).won) return w;
+      const w = JSON.parse(localStorage.getItem(PENDING_KEY));
+      if (w && typeof w.uid === 'string' && Number.isInteger(w.seed) && Array.isArray(w.taps)) return w;
     } catch (e) {}
     return null;
   }
-  function saveWin(w) { try { localStorage.setItem(WIN_KEY, JSON.stringify(w)); } catch (e) {} }
-  function clearWin() { try { localStorage.removeItem(WIN_KEY); } catch (e) {} }
-  let savedWin = loadSavedWin(), activeWin = null;
+  function writePending(w) { try { localStorage.setItem(PENDING_KEY, JSON.stringify(w)); } catch (e) {} }
+  function clearPending() { try { localStorage.removeItem(PENDING_KEY); } catch (e) {} }
 
   // ---- sound
   let actx = null, muted = false;
@@ -646,31 +740,69 @@
       'Oya, you come for my contract? Show me wetin you get.',
       'Na my name dey that signboard. Build.',
       'Another young builder wey wan take my job.',
-      'Contract no be gift. Earn am.'
+      'Contract no be gift. Earn am.',
+      'You sure say you sabi this work?',
+      'Na your first time holding a block?',
+      'You get experience or na trial and error?',
+      'You sure say you no miss road?',
+      'Who convince you say you be builder?',
+      'Hope say you know wetin you dey do?',
+      'This your confidence, I hope say e get backup.',
+      'You wan build tower or arrange Lego?',
+      'You sure say your hand no dey shake?',
+      'Should I be worried about this building?'
     ]],
     [8, [
       'Many don come before you. All of them don go.',
       'My workers don stack pass this one.',
       'Cement never dry yet, no celebrate.',
-      'Your CV no impress me yet.'
+      'Your CV no impress me yet.',
+      'Omo, na so you wan take impress me?',
+      'Even my apprentice fit do better.',
+      "I don see enough. Continue, I'm watching.",
+      'You call that progress?',
+      'At least something is happening.',
+      'This work dey somehow, but carry go.',
+      'I hope say na the foundation you dey test.',
+      "You're making me question my investment.",
+      'Hmm... interesting choice of technique.',
+      'No worry, I never lose hope in you. Yet.',
+      "At this rate, we'll finish next century!"
     ]],
     [18, [
       'Your hand don start to shake? Contract is heavy.',
       'My foreman wan laugh.',
       'Abeg, build straight. This no be bamboo house.',
-      'Even my apprentice no dey slow like this.'
+      'Even my apprentice no dey slow like this.',
+      'Your salary dey depend on this performance, remember.',
+      'I get people wey fit replace you, just saying.',
+      'Even the blocks dey confused.',
+      'You dey build skyscraper with village confidence.',
+      'I hope say you no use this same method for your exams.',
+      'My friend, take your time. We no dey run race.',
+      'One mistake is fine. Two? We\'re talking.',
+      'Not bad, you get small talent.',
+      'E be like say you sabi this thing small.',
+      "Okay, I'm beginning to see something.",
+      "That's more like it. Don't disappoint me."
     ]],
     [28, [
       'Haba, you reach here? Who recommended you?',
       'This height na for real contractors.',
       'Wind don start to blow. You ready?',
-      'Why my chest dey beat like this?'
+      'Why my chest dey beat like this?',
+      'Hmm, you fit actually surprise me.',
+      'Look at you, acting like a professional.',
+      "I didn't expect that. Well done."
     ]],
     [38, [
       'This one no suppose happen. Not my tower!',
       'Abeg, no shake my site.',
       'I never see steady hand like this.',
-      'Shey you wan collect my contract for real?'
+      'Shey you wan collect my contract for real?',
+      "You're getting better. Don't let it enter your head.",
+      'Not bad for someone I almost fired.',
+      "Keep going, maybe you'll become somebody."
     ]],
     [46, [
       "Wait! Don't drop that last block!",
@@ -685,7 +817,14 @@
     'Ha! Your block no fit hold.',
     'Your foundation don crack. Again?',
     'Pay for the damage!',
-    'Even my apprentice go do better.'
+    'Even my apprentice go do better.',
+    'Ah! Wetin happen there?',
+    'Easy o! This no be demolition site.',
+    'You wan make me spend extra money?',
+    'That block no deserve this treatment.',
+    'Are you building or fighting the blocks?',
+    'I hope nobody is watching this.',
+    'Should I call another contractor?'
   ];
   const WIN_TAUNTS = ['You win. Take the contract.', 'Ahh! My tower don fall!', 'Okay. Today na your day, contractor.'];
   let lastTaunt = '';
@@ -708,7 +847,6 @@
       setTimeout(() => beep(523, 0.09, 'square', 0.035), 70);
     }, delay == null ? 90 : delay);
   }
-
   // ---- game state and view
   let g = demoGame(), state = 'ready', pending = false, paused = false;
   let camY = 0, dpr = 1, cw = 0, ch = 0, S = 1, viewH = 700;
@@ -745,69 +883,260 @@
     faceEl.classList.toggle('worried', n >= C.targetHeight * 0.8);
   }
 
-  // ---- overlay screens: start, lose, claim
+  // ---- the database (loaded by the module script below as window.FB)
+  let fbWait = null;
+  function whenFB() {
+    if (window.FB) return Promise.resolve(window.FB);
+    if (window.FBError) return Promise.reject(window.FBError);
+    if (fbWait) return fbWait;
+    fbWait = new Promise((resolve, reject) => {
+      let t = 0;
+      const done = () => { clearTimeout(t); removeEventListener('fb-ready', ok); removeEventListener('fb-fail', bad); };
+      const ok = () => { done(); resolve(window.FB); };
+      const bad = () => { done(); fbWait = null; reject(window.FBError || new Error('fb-fail')); };
+      t = setTimeout(() => { done(); fbWait = null; reject(new Error('fb-timeout')); }, 20000);
+      addEventListener('fb-ready', ok); addEventListener('fb-fail', bad);
+    });
+    return fbWait;
+  }
+  function authMsg(e) {
+    const c = e && e.code;
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return 'Sign-in was cancelled. Tap the button to try again.';
+    if (c === 'auth/network-request-failed') return 'No internet. Check your connection and try again.';
+    if (c === 'auth/unauthorized-domain') return 'This website is not allowed to sign in yet. The owner must add it under Authorized domains in Firebase.';
+    if (c === 'auth/operation-not-allowed') return 'Google sign-in is not switched on yet. The owner must turn it on in Firebase.';
+    if (e && (e.message === 'fb-timeout' || e.message === 'fb-fail')) return 'Could not reach the game server. Check your internet and try again.';
+    return 'Sign-in did not work' + (c ? ' (' + c + ')' : '') + '. Try again.';
+  }
+  function dbMsg(e) {
+    const c = e && e.code;
+    if (c === 'permission-denied') return 'The database refused the request. The owner may not have published the access rules yet.';
+    if (c === 'unavailable' || (e && (e.message === 'fb-timeout' || e.message === 'fb-fail'))) return 'Could not reach the game server. Check your internet and try again.';
+    return 'Something went wrong' + (c ? ' (' + c + ')' : '') + '. Try again.';
+  }
+
+  // ---- who is signed in
+  let me = null, player = null, authKnown = false, authToken = 0, fbFailed = false;
+  let myBest = 0, bestWeek = '', inflightBest = 0, myWins = [], winMsg = '', saving = false, curMode = 'start';
+
+  function updateWho() {
+    $('who').textContent = me && player ? player.name + ' · airtime goes to ' + fmtPhone(player.phone) : (me ? me.email : '');
+    $('signOutBtn').hidden = !me;
+  }
+
+  // ---- the sign-in / sign-up screen
+  const profileForm = $('profileForm'), pfConfirm = $('pfConfirm');
+  let draft = null;
+  function showAuth(mode, msg) {
+    authOv.hidden = false;
+    overlay.hidden = true;
+    $('googleBtn').hidden = mode !== 'out';
+    $('authBoardBtn').hidden = mode !== 'out';
+    $('retryBtn').hidden = mode !== 'error';
+    $('authSignOut').hidden = !(me && (mode === 'form' || mode === 'confirm' || mode === 'error'));
+    $('authFine').hidden = mode !== 'out';
+    profileForm.hidden = mode !== 'form';
+    pfConfirm.hidden = mode !== 'confirm';
+    $('authTitle').hidden = mode === 'form' || mode === 'confirm';
+    $('authChip').hidden = mode === 'form' || mode === 'confirm';
+    const text = $('authText');
+    text.hidden = mode === 'confirm';
+    if (mode === 'loading') text.textContent = msg || 'Loading…';
+    else if (mode === 'out') text.textContent = 'Sign in with Google to play. You need an account so we can send your prize if you win.';
+    else if (mode === 'form') text.textContent = 'One more step. Tell us where to send your prize.';
+    else if (mode === 'error') text.textContent = msg || 'Something went wrong.';
+    if (mode !== 'out' && mode !== 'error') $('authErr').textContent = '';
+    authOv.scrollTop = 0;
+  }
+
+  $('googleBtn').addEventListener('click', () => doSignIn($('googleBtn'), $('authErr')));
+  $('ownerSignIn').addEventListener('click', () => doSignIn($('ownerSignIn'), $('gateText')));
+  async function doSignIn(btn, errEl) {
+    btn.disabled = true; errEl.textContent = '';
+    try { const f = await whenFB(); await f.signIn(); }
+    catch (e) { errEl.textContent = authMsg(e); }
+    btn.disabled = false;
+  }
+  async function doSignOut() { try { const f = await whenFB(); await f.signOut(); } catch (e) {} }
+  $('signOutBtn').addEventListener('click', doSignOut);
+  $('ownerSignOut').addEventListener('click', doSignOut);
+  $('authSignOut').addEventListener('click', doSignOut);
+  $('retryBtn').addEventListener('click', () => location.reload());
+
+  async function onUser(u) {
+    const tok = ++authToken;
+    authKnown = true;
+    me = u; player = null;
+    if (!u) {
+      myBest = 0; myWins = []; winMsg = ''; ownerLoadedFor = '';
+      state = 'ready'; pending = false; g = demoGame();
+      $('bubble').hidden = true;
+      updateWho(); renderGate(); showAuth('out');
+      return;
+    }
+    updateWho(); renderGate();
+    showAuth('loading', 'Checking your account…');
+    try {
+      const f = await whenFB();
+      const p = await f.getPlayer(u.uid);
+      if (tok !== authToken) return;
+      if (p && p.name && p.phone) { player = p; enterGame(); }
+      else {
+        $('pfName').value = u.name || '';
+        $('pfPhone').value = ''; $('pfPhone2').value = ''; $('pfConsent').checked = false; $('pfErr').textContent = '';
+        showAuth('form');
+      }
+    } catch (e) {
+      if (tok !== authToken) return;
+      showAuth('error', dbMsg(e));
+    }
+  }
+
+  function enterGame() {
+    updateWho();
+    authOv.hidden = true;
+    endLine = '';
+    showOverlay('start');
+    refreshMyBest(); refreshMyWins(); saveWinNow();
+  }
+
+  // ---- one-time sign-up form: name and the phone number the prize goes to
+  profileForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('pfName').value.trim().replace(/\s+/g, ' ');
+    const p1 = normPhone($('pfPhone').value), p2 = normPhone($('pfPhone2').value);
+    let err = '';
+    if (name.length < 2) err = 'Enter your name.';
+    else if (!p1) err = 'Enter a valid Nigerian phone number, like 0801 234 5678.';
+    else if (!p2 || p2 !== p1) err = 'The two numbers are not the same. Type the number again.';
+    else if (!$('pfConsent').checked) err = 'Tick the box to agree.';
+    $('pfErr').textContent = err;
+    if (err) return;
+    draft = { name: name.slice(0, 40), phone: p1 };
+    $('pfConfirmNum').textContent = fmtPhone(p1);
+    $('pfConfirmTop').textContent = 'If you win, we will send ' + naira(PRIZE) + ' airtime to';
+    $('pfSaveErr').textContent = '';
+    showAuth('confirm');
+  });
+  $('pfBack').addEventListener('click', () => showAuth('form'));
+  $('pfSave').addEventListener('click', async () => {
+    if (!draft || !me) return;
+    const btn = $('pfSave'); btn.disabled = true; $('pfSaveErr').textContent = '';
+    const tok = authToken;
+    try {
+      const f = await whenFB();
+      await f.savePlayer(me.uid, { name: draft.name, phone: draft.phone, email: me.email });
+      if (tok !== authToken) return;
+      player = { name: draft.name, phone: draft.phone };
+      enterGame();
+    } catch (e) { $('pfSaveErr').textContent = dbMsg(e); }
+    btn.disabled = false;
+  });
+
+  // ---- this player's board entry and past wins
+  function getMyBest() {
+    const wk = weekInfo().key;
+    if (bestWeek !== wk) { bestWeek = wk; myBest = 0; inflightBest = 0; }
+    return myBest;
+  }
+  async function refreshMyBest() {
+    if (!me) return;
+    const uid = me.uid, wk = weekInfo().key;
+    try {
+      const f = await whenFB();
+      const b = await f.getMyEntry(wk, uid);
+      if (me && me.uid === uid) { getMyBest(); if (bestWeek === wk && b > myBest) myBest = b; }
+    } catch (e) {}
+  }
+  async function refreshMyWins() {
+    if (!me) return;
+    const uid = me.uid;
+    try {
+      const f = await whenFB();
+      const list = await f.getMyWins(uid);
+      if (me && me.uid === uid) { myWins = list; refreshWinUI(); }
+    } catch (e) {}
+  }
+
+  // ---- saving rounds, board entries and wins
+  function recordRound(n, won) {
+    if (!me) return;
+    const uid = me.uid;
+    whenFB().then((f) => f.saveRound(uid, n, won)).catch(() => {});
+    if (n >= 1 && n > getMyBest() && n > inflightBest) {
+      inflightBest = n;
+      const wk = weekInfo().key, now = Date.now(), nm = boardName(player ? player.name : '');
+      whenFB().then((f) => f.saveBoardEntry(wk, uid, { name: nm, best: n, rank: rankFor(n, now) })).then(() => {
+        if (bestWeek === wk && n > myBest) myBest = n;
+      }).catch(() => { if (inflightBest === n) inflightBest = 0; });
+    }
+  }
+  function refreshWinUI() {
+    const pw = readPending(), mine = !!(pw && me && pw.uid === me.uid);
+    winStatus.textContent = winMsg;
+    winStatus.hidden = !(curMode === 'win' && winMsg);
+    retryWinBtn.hidden = !(mine && !saving && !overlay.hidden);
+    const n = myWins.length;
+    if (curMode === 'start' && n) {
+      const paid = myWins.filter((w) => w.status === 'paid').length, bad = myWins.filter((w) => w.status === 'rejected').length, wait = n - paid - bad;
+      myWinsEl.textContent = 'You have beaten the boss ' + n + (n === 1 ? ' time.' : ' times.') + (paid ? ' ' + paid + ' paid.' : '') + (wait ? ' ' + wait + ' being checked.' : '') + (bad ? ' ' + bad + ' not accepted.' : '');
+      myWinsEl.hidden = false;
+    } else myWinsEl.hidden = true;
+  }
+  async function saveWinNow() {
+    const w = readPending();
+    if (!w || !me || w.uid !== me.uid || !player || saving) return;
+    const r = replay(w);
+    if (!r.won) { clearPending(); return; }
+    saving = true; winMsg = 'Saving your win…'; refreshWinUI();
+    const uid = me.uid;
+    try {
+      const f = await whenFB();
+      await f.saveWin(uid, w.seed, { name: player.name, phone: player.phone, email: me.email, taps: encodeTaps(w.taps), score: r.score });
+      clearPending();
+      winMsg = 'Your win is saved. Oga’s team will check it, then send ' + naira(PRIZE) + ' airtime to ' + fmtPhone(player.phone) + '.';
+      saving = false; refreshWinUI(); refreshMyWins();
+    } catch (e) {
+      saving = false;
+      winMsg = 'Your win is kept on this phone, but we could not save it yet. Check your internet and tap Try saving again.';
+      refreshWinUI();
+    }
+  }
+  retryWinBtn.addEventListener('click', saveWinNow);
+
+  // ---- overlay screens: start, lose, win
   function showOverlay(mode) {
-    const claim = mode === 'claim';
-    ovChip.hidden = claim;
-    claimBox.hidden = !claim;
+    curMode = mode;
+    ovChip.hidden = mode === 'win';
     ovQuote.hidden = mode === 'start' || !endLine;
     ovQuote.textContent = endLine ? '“' + endLine + '”' : '';
     if (tipEl) tipEl.hidden = mode !== 'start';
     installBtn.hidden = !(installEvt && mode === 'start');
     $('bubble').hidden = true;
-    claimLink.hidden = !claim; copyBtn.hidden = !claim; doneBtn.hidden = !claim;
     shareBtn.hidden = mode !== 'lose';
-    openClaimBtn.hidden = claim || !savedWin;
-    startBtn.className = claim ? 'btn ghost' : 'btn';
+    startBtn.className = 'btn';
     if (mode === 'start') {
-      ovTitle.textContent = 'Stack Rush';
+      ovTitle.textContent = 'Oga Contractor';
       ovText.textContent = 'Tap to drop each block. Stack ' + C.targetHeight + ' to beat Oga Contractor and win ' + naira(PRIZE) + '.';
       startBtn.textContent = 'Start';
     } else if (mode === 'lose') {
       startBtn.textContent = 'Play again';
     } else {
       ovTitle.textContent = 'Boss beaten';
-      ovText.textContent = 'You stacked all ' + C.targetHeight + ' blocks. Add your details to claim your ' + naira(PRIZE) + '.';
+      ovText.textContent = 'You stacked all ' + C.targetHeight + ' blocks. You beat Oga Contractor.';
       startBtn.textContent = 'Play again';
-      refreshClaim();
     }
     overlay.hidden = false;
+    refreshWinUI();
     overlay.scrollTop = 0;
   }
 
-  function currentClaimMsg() {
-    if (!activeWin) return null;
-    const name = claimName.value.trim(), phone = claimPhone.value.replace(/[^\d+]/g, '');
-    if (name.length < 2 || phone.replace(/\D/g, '').length < 10) return null;
-    const code = encodeClaim({ seed: activeWin.seed, taps: activeWin.taps, name, phone, at: activeWin.at });
-    return 'Stack Rush win claim\nName: ' + name + '\nPhone: ' + phone + '\nBlocks: ' + activeWin.score + '\nCode: ' + code;
-  }
-  function refreshClaim() {
-    const msg = currentClaimMsg();
-    claimLink.setAttribute('aria-disabled', msg ? 'false' : 'true');
-    claimLink.href = msg ? 'https://wa.me/' + OWNER_WHATSAPP + '?text=' + encodeURIComponent(msg) : '#';
-    copyBtn.disabled = !msg;
-  }
-  claimName.addEventListener('input', refreshClaim);
-  claimPhone.addEventListener('input', refreshClaim);
-  claimBox.addEventListener('submit', (e) => e.preventDefault());
-  claimLink.addEventListener('click', (e) => { if (claimLink.getAttribute('aria-disabled') === 'true') e.preventDefault(); });
-  copyBtn.addEventListener('click', async () => {
-    const msg = currentClaimMsg();
-    if (!msg) return;
-    let label = 'Copied';
-    try { await navigator.clipboard.writeText(msg); } catch (e) { label = 'Copy not available'; }
-    copyBtn.textContent = label;
-    setTimeout(() => { copyBtn.textContent = 'Copy claim'; }, 1800);
-  });
-  openClaimBtn.addEventListener('click', () => { activeWin = savedWin; showOverlay('claim'); });
-  doneBtn.addEventListener('click', () => { clearWin(); savedWin = null; activeWin = null; showOverlay('start'); });
-
   function start() {
+    if (!me || !player) return;
     g = newGame((Math.random() * 4294967296) >>> 0);
     state = 'playing'; pending = false; camY = 0; pieces = []; popups = []; flash = 0;
     overlay.hidden = true;
-    endLine = '';
+    endLine = ''; winMsg = '';
     setHud(0);
   }
 
@@ -817,21 +1146,24 @@
     stats.played++; if (won) stats.wins++; if (n > stats.best) stats.best = n;
     saveStats(); showStats();
     window.StackRush.lastRun = { version: C.version, seed: g.seed, taps: g.taps.slice(), score: n, won };
+    recordRound(n, won);
     if (won) {
-      activeWin = { seed: g.seed, taps: g.taps.slice(), at: Date.now(), score: n };
-      saveWin(activeWin); savedWin = activeWin;
+      if (me) writePending({ uid: me.uid, seed: g.seed, taps: g.taps.slice(), score: n, at: Date.now() });
+      winMsg = 'Saving your win…';
       endLine = pick(WIN_TAUNTS); say(endLine, 250);
       [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.16, 'triangle', 0.08), i * 110));
+      saveWinNow();
     } else {
       endLine = pick(MISS_TAUNTS); say(endLine, 250);
       faceEl.classList.remove('shake'); void faceEl.getBoundingClientRect(); faceEl.classList.add('shake');
       beep(110, 0.3, 'sawtooth', 0.06);
     }
     setTimeout(() => {
-      if (won) { showOverlay('claim'); return; }
+      if (!me || !player) return;
+      if (won) { showOverlay('win'); return; }
       ovTitle.textContent = 'Fell at ' + n;
       ovText.textContent = (C.targetHeight - n) + ' more to reach the boss. Your best is ' + stats.best + '.';
-      const msg = 'I stacked ' + n + ' blocks on Stack Rush. Can you beat ' + n + '? ' + location.href;
+      const msg = 'I stacked ' + n + ' blocks on Oga Contractor. Can you beat ' + n + '? ' + location.href.split('#')[0];
       shareBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
       showOverlay('lose');
     }, won ? 700 : 550);
@@ -858,13 +1190,70 @@
     if (r.win) finish();
   }
 
-  // ---- input
-  stage.addEventListener('pointerdown', (e) => { if (state === 'playing' && !paused) { e.preventDefault(); pending = true; } });
-  window.addEventListener('keydown', (e) => {
-    if (state === 'playing' && !paused && !gameView.hidden && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); pending = true; }
-    if (e.key === 'Escape' && !sheet.hidden) closeSheet();
-  });
-  startBtn.addEventListener('click', start);
+  // ---- Top 5 board: real players this week plus Oga's workers (computer players)
+  const FIRST_NAMES = ['Chidi', 'Aisha', 'Tunde', 'Ngozi', 'Emeka', 'Bola', 'Ibrahim', 'Funke', 'Segun', 'Amaka', 'Yusuf', 'Kemi', 'Obinna', 'Hauwa', 'Femi', 'Zainab', 'Ifeanyi', 'Sade', 'Musa', 'Chioma', 'Dayo', 'Halima', 'Uche', 'Titi', 'Kunle', 'Nneka', 'Bashir', 'Folake', 'Ebuka', 'Rashida', 'Gbenga', 'Ada', 'Tobi', 'Maryam', 'Chinedu', 'Yetunde', 'Sola', 'Ifeoma', 'Kelechi', 'Damilola'];
+  const INITIALS = 'ABCDEFGHIJKLMNOPRSTUWY';
+  function makeWorkers(week) {
+    const r = mulberry32(hashStr('oga-workers:' + week));
+    const used = new Set(), out = [];
+    while (out.length < WORKER_COUNT) {
+      const name = FIRST_NAMES[Math.floor(r() * FIRST_NAMES.length)] + ' ' + INITIALS[Math.floor(r() * INITIALS.length)] + '.';
+      if (used.has(name)) continue;
+      used.add(name);
+      out.push({ name, best: Math.min(C.targetHeight - 1, Math.round(5 + 32 * Math.pow(r(), 2))) });
+    }
+    return out;
+  }
+  function buildBoard(real, week) {
+    const rows = real.map((x) => ({ real: true, uid: x.uid, name: x.name, best: x.best, rank: x.rank }))
+      .concat(makeWorkers(week).map((x) => ({ real: false, uid: '', name: x.name, best: x.best, rank: 0 })));
+    rows.sort((a, b) => (b.best - a.best) || ((b.real ? 1 : 0) - (a.real ? 1 : 0)) || (b.rank - a.rank));
+    return rows.slice(0, 5);
+  }
+  const boardSheet = $('boardSheet');
+  function renderBoard(real, failed) {
+    const wk = weekInfo().key, top = buildBoard(real, wk), list = $('boardList');
+    list.textContent = '';
+    let mine = 0;
+    top.forEach((r, i) => {
+      const isMe = !!(r.real && me && r.uid === me.uid);
+      if (isMe) mine = i + 1;
+      const li = h('li', 'brow' + (isMe ? ' me' : ''));
+      li.appendChild(h('span', 'rk', String(i + 1)));
+      const nm = h('span', 'nm', r.name);
+      if (isMe) nm.appendChild(h('span', 'tag you', 'You'));
+      else if (!r.real) nm.appendChild(h('span', 'tag', 'Oga’s worker'));
+      li.appendChild(nm);
+      const bl = h('b', 'bl', String(r.best)); bl.appendChild(h('small', '', 'blocks'));
+      li.appendChild(bl);
+      list.appendChild(li);
+    });
+    const fifth = top[4], need = Math.min(C.targetHeight, fifth.real ? fifth.best + 1 : fifth.best), b = getMyBest();
+    let msg;
+    if (!me) msg = 'Sign in and stack ' + need + ' or more to get on the board.';
+    else if (mine) msg = 'You are number ' + mine + ' this week.';
+    else if (b > 0) msg = 'Your best this week is ' + b + '. Stack ' + need + ' or more to get into the Top 5.';
+    else msg = 'Stack ' + need + ' or more to get into the Top 5.';
+    if (failed) msg = 'Could not load real players right now, so only Oga’s workers show. ' + msg;
+    $('boardMsg').textContent = msg;
+  }
+  async function openBoard() {
+    paused = true; pending = false;
+    boardSheet.hidden = false;
+    renderBoard([], false);
+    $('boardMsg').textContent = 'Loading real players…';
+    $('boardClose').focus();
+    try {
+      const f = await whenFB();
+      const real = await f.getBoard(weekInfo().key);
+      if (!boardSheet.hidden) renderBoard(real, false);
+    } catch (e) { if (!boardSheet.hidden) renderBoard([], true); }
+  }
+  function closeBoard() { boardSheet.hidden = true; paused = false; acc = 0; if (document.activeElement) document.activeElement.blur(); }
+  $('boardBtn').addEventListener('click', openBoard);
+  $('authBoardBtn').addEventListener('click', openBoard);
+  $('boardClose').addEventListener('click', closeBoard);
+  boardSheet.addEventListener('pointerdown', (e) => { if (e.target === boardSheet) closeBoard(); });
 
   // ---- boss card
   const sheet = $('sheet'), sheetClose = $('sheetClose');
@@ -873,6 +1262,14 @@
   $('bossBtn').addEventListener('click', openSheet);
   sheetClose.addEventListener('click', closeSheet);
   sheet.addEventListener('pointerdown', (e) => { if (e.target === sheet) closeSheet(); });
+
+  // ---- input
+  stage.addEventListener('pointerdown', (e) => { if (state === 'playing' && !paused) { e.preventDefault(); pending = true; } });
+  window.addEventListener('keydown', (e) => {
+    if (state === 'playing' && !paused && !gameView.hidden && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); pending = true; }
+    if (e.key === 'Escape') { if (!sheet.hidden) closeSheet(); else if (!boardSheet.hidden) closeBoard(); }
+  });
+  startBtn.addEventListener('click', start);
 
   // ---- drawing
   const sy = (wy) => viewH - 64 - (wy - camY);
@@ -967,141 +1364,136 @@
     requestAnimationFrame(frame);
   }
 
-  // ---- owner page (#admin): paste a win message, the round is replayed, then confirm and mark paid
+  // ---- owner page (#admin): only the owner's Google account. Wins are replayed here before anyone is paid.
   const STATUS_LABEL = { pending: 'Pending', confirmed: 'Confirmed', paid: 'Paid', rejected: 'Rejected' };
-  let adminStarted = false, claims = [];
-  const CLAIMS_KEY = 'stackrush.claims.v1';
-  function saveClaims() {
-    try { localStorage.setItem(CLAIMS_KEY, JSON.stringify(claims)); return true; }
-    catch (e) { $('dbNote').hidden = false; return false; }
-  }
-
-  function h(tag, cls, text) {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
-  }
-  function fmtDate(ms) {
-    if (!ms) return 'unknown time';
-    try { return new Date(ms).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return 'unknown time'; }
-  }
+  let ownerLoadedFor = '', ownerData = null;
   function setMsg(text, kind) { const m = $('adminMsg'); m.textContent = text || ''; m.className = 'msg' + (kind ? ' ' + kind : ''); }
 
-  async function addClaim(doc) {
-    if (claims.some((c) => c.id === doc.id)) return false;
-    claims.unshift(doc); saveClaims(); renderClaims();
-    return true;
-  }
-  async function setStatus(c, status) {
-    Object.assign(c, { status, updatedAt: Date.now() });
-    saveClaims(); renderClaims();
-  }
-
-  function claimCard(c, phoneCount) {
-    const li = h('li', 'claim');
-    const top = h('div', 'row');
-    top.appendChild(h('strong', 'cname', c.name || 'No name given'));
-    top.appendChild(h('span', 'pill ' + c.status, STATUS_LABEL[c.status] || String(c.status)));
-    li.appendChild(top);
-
-    const wa = waNumber(c.phone);
-    const contact = h('div', 'row');
-    contact.appendChild(h('span', 'phone', c.phone || 'No number given'));
-    if (wa.length >= 10) {
-      const a = h('a', 'link', 'Open WhatsApp chat');
-      a.href = 'https://wa.me/' + wa; a.target = '_blank'; a.rel = 'noopener';
-      contact.appendChild(a);
+  function renderGate() {
+    if (adminView.hidden) return;
+    const gate = $('adminGate'), tools = $('adminTools'), text = $('gateText');
+    const isOwner = !!(me && me.email && me.email.toLowerCase() === OWNER_EMAIL);
+    gate.hidden = isOwner; tools.hidden = !isOwner;
+    $('ownerSignIn').hidden = true; $('ownerSignOut').hidden = true;
+    if (isOwner) {
+      if (ownerLoadedFor !== me.uid) { ownerLoadedFor = me.uid; loadOwner(); }
+      return;
     }
+    if (fbFailed) text.textContent = 'Could not reach the game server. Check your internet and reload this page.';
+    else if (!authKnown) text.textContent = 'Loading…';
+    else if (!me) { text.textContent = 'Sign in with the owner Google account to see wins and players.'; $('ownerSignIn').hidden = false; }
+    else { text.textContent = 'You are signed in as ' + me.email + ', which is not the owner account.'; $('ownerSignOut').hidden = false; }
+  }
+
+  async function loadOwner() {
+    setMsg('Loading…');
+    try {
+      const f = await whenFB();
+      const r = await Promise.all([f.ownerCounts(), f.ownerListWins(), f.ownerListPlayers()]);
+      ownerData = { counts: r[0], wins: r[1], players: r[2] };
+      renderOwner(); setMsg('');
+    } catch (e) { setMsg(dbMsg(e), 'err'); }
+  }
+  $('refreshBtn').addEventListener('click', loadOwner);
+
+  // Replay a saved win from its seed and taps, and collect reasons to look closer.
+  function analyse(w, uidCount, phoneCount) {
+    const seed = Number(String(w.id).split('_')[1]), taps = decodeTaps(w.taps), flags = [];
+    let ok = false, out = null;
+    if (!Number.isInteger(seed) || !taps) flags.push('The tap record is not valid. Do not pay this.');
+    else {
+      out = replay({ seed, taps });
+      if (!out.won) flags.push('This round does not replay to a win. Do not pay this.');
+      else {
+        ok = true;
+        const secs = Math.round(out.ticks / C.tickRate);
+        if (secs < FAST_SECONDS) flags.push('Round took only ' + secs + ' seconds, which is faster than most people can play');
+        if (out.drops && out.perfects / out.drops >= PERFECT_FLAG) flags.push(Math.round(out.perfects / out.drops * 100) + '% of drops were perfect, which is unusual');
+        if (taps.length > out.drops) flags.push('The record has extra taps after the win');
+      }
+    }
+    if (uidCount[w.uid] > 1) flags.push('This account has ' + uidCount[w.uid] + ' wins');
+    if (phoneCount[w.phone] > 1) flags.push('This number has ' + phoneCount[w.phone] + ' wins');
+    return { w, ok, out, flags };
+  }
+
+  function winCard(a) {
+    const w = a.w, li = h('li', 'claim');
+    const top = h('div', 'row');
+    top.appendChild(h('strong', 'cname', w.name || 'No name'));
+    top.appendChild(h('span', 'pill ' + w.status, STATUS_LABEL[w.status] || String(w.status)));
+    li.appendChild(top);
+    const contact = h('div', 'row');
+    contact.appendChild(h('span', 'phone', w.phone || 'No number'));
+    contact.appendChild(h('span', 'meta', w.email || ''));
     li.appendChild(contact);
-
-    const secs = Math.round((c.ticks || 0) / C.tickRate);
-    li.appendChild(h('p', 'meta', c.score + ' blocks · round of ' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') + ' · ' + (c.perfects || 0) + ' perfect drops · claimed ' + fmtDate(c.claimedAt)));
-
-    const flags = (c.flags || []).slice();
-    if (wa && phoneCount[wa] > 1) flags.push('This number has ' + phoneCount[wa] + ' claims');
+    const secs = a.out ? Math.round(a.out.ticks / C.tickRate) : 0;
+    li.appendChild(h('p', 'meta', (a.out ? a.out.score : w.score) + ' blocks · round of ' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') + ' · ' + (a.out ? a.out.perfects : 0) + ' perfect drops · won ' + fmtDate(w.at)));
     const fl = h('div', 'flags');
-    if (flags.length) flags.forEach((f) => fl.appendChild(h('span', 'flag', f)));
-    else fl.appendChild(h('span', 'flag clear', 'Round replayed, no flags'));
+    if (a.flags.length) a.flags.forEach((t) => fl.appendChild(h('span', 'flag', t)));
+    if (a.ok && !a.flags.some((t) => /does not replay|not valid/.test(t))) fl.appendChild(h('span', 'flag clear', 'Round replayed to a real win'));
     li.appendChild(fl);
-
     const btns = h('div', 'btns');
     const act = (label, cls, status) => {
       const b = h('button', 'sbtn' + (cls ? ' ' + cls : ''), label);
       b.type = 'button';
       b.addEventListener('click', async () => {
         b.disabled = true;
-        try { await setStatus(c, status); } catch (e) { setMsg('That change was not saved. Try again.', 'err'); b.disabled = false; }
+        try { const f = await whenFB(); await f.updateWin(w.id, status); w.status = status; renderOwner(); setMsg(''); }
+        catch (e) { setMsg('That change was not saved. ' + dbMsg(e), 'err'); b.disabled = false; }
       });
       btns.appendChild(b);
     };
-    if (c.status === 'pending') { act('Confirm win', 'primary', 'confirmed'); act('Reject', 'danger', 'rejected'); }
-    else if (c.status === 'confirmed') { act('Mark as paid', 'primary', 'paid'); act('Move back to pending', '', 'pending'); }
-    else if (c.status === 'rejected') { act('Move back to pending', '', 'pending'); }
+    if (w.status === 'pending') { if (a.ok) act('Confirm win', 'primary', 'confirmed'); act('Reject', 'danger', 'rejected'); }
+    else if (w.status === 'confirmed') { if (a.ok) act('Mark as paid', 'primary', 'paid'); act('Move back to pending', '', 'pending'); }
+    else if (w.status === 'rejected') act('Move back to pending', '', 'pending');
     if (btns.childNodes.length) li.appendChild(btns);
     return li;
   }
 
-  function renderClaims() {
-    const list = $('claimList'); list.textContent = '';
-    const phoneCount = {};
-    claims.forEach((c) => { const k = waNumber(c.phone); if (k) phoneCount[k] = (phoneCount[k] || 0) + 1; });
+  function renderOwner() {
+    const d = ownerData;
+    if (!d) return;
+    const uidCount = {}, phoneCount = {};
+    d.wins.forEach((w) => { uidCount[w.uid] = (uidCount[w.uid] || 0) + 1; phoneCount[w.phone] = (phoneCount[w.phone] || 0) + 1; });
     const order = { pending: 0, confirmed: 1, paid: 2, rejected: 3 };
-    const sorted = claims.slice().sort((a, b) => ((order[a.status] ?? 9) - (order[b.status] ?? 9)) || ((b.addedAt || 0) - (a.addedAt || 0)));
+    const sorted = d.wins.slice().sort((a, b) => ((order[a.status] ?? 9) - (order[b.status] ?? 9)) || (b.at - a.at));
+    const list = $('winList'); list.textContent = '';
     let np = 0, nc = 0, npaid = 0;
-    sorted.forEach((c) => {
-      if (c.status === 'pending') np++; else if (c.status === 'confirmed') nc++; else if (c.status === 'paid') npaid++;
-      list.appendChild(claimCard(c, phoneCount));
+    sorted.forEach((w) => {
+      if (w.status === 'pending') np++; else if (w.status === 'confirmed') nc++; else if (w.status === 'paid') npaid++;
+      list.appendChild(winCard(analyse(w, uidCount, phoneCount)));
     });
+    $('emptyWins').hidden = d.wins.length > 0;
+    $('tPlayers').textContent = d.counts.players;
+    $('tRounds').textContent = d.counts.rounds;
+    $('tBossWins').textContent = d.counts.wins;
+    $('tRate').textContent = (d.counts.rounds ? Math.round(d.counts.wins / d.counts.rounds * 1000) / 10 : 0) + '% of rounds';
     $('tPending').textContent = np;
     $('tToPay').textContent = naira(nc * PRIZE);
     $('tToPayN').textContent = nc + (nc === 1 ? ' win' : ' wins');
     $('tPaid').textContent = naira(npaid * PRIZE);
     $('tPaidN').textContent = npaid + (npaid === 1 ? ' win' : ' wins');
-    $('emptyClaims').hidden = claims.length > 0;
-  }
 
-  $('checkBtn').addEventListener('click', async () => {
-    setMsg('');
-    const res = decodeClaim($('pasteBox').value);
-    if (res.error) { setMsg(res.error, 'err'); return; }
-    const c = res.claim, out = replay(c);
-    if (!out.won) { setMsg('This round does not replay to a win. Do not pay it.', 'err'); return; }
-    const secs = Math.round(out.ticks / C.tickRate), flags = [];
-    if (secs < FAST_SECONDS) flags.push('Round took only ' + secs + ' seconds, which is faster than most people can play');
-    if (out.drops && out.perfects / out.drops >= PERFECT_FLAG) flags.push(Math.round(out.perfects / out.drops * 100) + '% of drops were perfect, which is unusual');
-    if (c.taps.length > out.drops) flags.push('The code has extra taps after the win');
-    const doc = {
-      id: 'c' + c.seed, name: c.name, phone: c.phone, seed: c.seed, taps: c.taps,
-      score: out.score, ticks: out.ticks, drops: out.drops, perfects: out.perfects, flags,
-      status: 'pending', claimedAt: c.at, addedAt: Date.now()
-    };
-    try {
-      const added = await addClaim(doc);
-      if (!added) { setMsg('This win is already in the list.', 'err'); return; }
-      $('pasteBox').value = '';
-      setMsg(flags.length ? 'Added as pending. It has flags, read them before you confirm.' : 'Added as pending. The round replays to a real win.', 'ok');
-    } catch (e) {
-      setMsg('Could not save this claim. Try again.', 'err');
-    }
-  });
-
-  function startAdmin() {
-    if (adminStarted) return;
-    adminStarted = true;
-    $('adminTools').hidden = false;
-    try {
-      const saved = JSON.parse(localStorage.getItem(CLAIMS_KEY));
-      if (Array.isArray(saved)) claims = saved.filter((c) => c && typeof c.id === 'string');
-    } catch (e) {}
-    renderClaims();
+    const phones = {};
+    d.players.forEach((p) => { phones[p.phone] = (phones[p.phone] || 0) + 1; });
+    const pl = $('playerList'); pl.textContent = '';
+    d.players.forEach((p) => {
+      const li = h('li', 'player');
+      li.appendChild(h('b', '', p.name || 'No name'));
+      li.appendChild(h('span', 'phone', p.phone || 'No number'));
+      li.appendChild(h('span', '', (p.email || '') + ' · joined ' + fmtDate(p.createdAt)));
+      if (phones[p.phone] > 1) li.appendChild(h('span', 'flag', 'This number is used by ' + phones[p.phone] + ' accounts'));
+      pl.appendChild(li);
+    });
+    $('emptyPlayers').hidden = d.players.length > 0;
   }
 
   // ---- routing: #admin shows the owner page, anything else shows the game
   function route() {
     const admin = location.hash === '#admin';
     gameView.hidden = admin; adminView.hidden = !admin;
-    if (admin) startAdmin();
+    if (admin) renderGate();
   }
   window.addEventListener('hashchange', route);
 
@@ -1124,11 +1516,120 @@
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
   }
 
+  // ---- start up
   showStats();
-  showOverlay('start');
   tauntEl.textContent = TAUNTS[0][1][0];
+  showAuth('loading');
   route();
   requestAnimationFrame(frame);
+  whenFB().then((f) => f.onAuth(onUser)).catch((e) => {
+    authKnown = true; fbFailed = true;
+    showAuth('error', 'Could not reach the game server. Check your internet and try again.');
+    renderGate();
+  });
+})();
+</script>
+<script type="module">
+// Firebase (free Spark plan). The web config below is public by design; the Firestore rules protect the data.
+const CFG = {
+  apiKey: 'AIzaSyDgBrBOpQWvEp3eRU97PDECT3Y1m0qn1jI',
+  authDomain: 'oga-contractor.firebaseapp.com',
+  projectId: 'oga-contractor',
+  storageBucket: 'oga-contractor.firebasestorage.app',
+  messagingSenderId: '910122234444',
+  appId: '1:910122234444:web:0c7064a81e839b2b193ae9'
+};
+(async () => {
+  try {
+    const base = 'https://www.gstatic.com/firebasejs/10.14.1/';
+    const [A, U, S] = await Promise.all([
+      import(base + 'firebase-app.js'),
+      import(base + 'firebase-auth.js'),
+      import(base + 'firebase-firestore.js')
+    ]);
+    const app = A.initializeApp(CFG);
+    const auth = U.getAuth(app);
+    const provider = new U.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const db = S.initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+    try { U.getRedirectResult(auth).catch(() => {}); } catch (e) {}
+    const ms = (t) => (t && typeof t.toMillis === 'function') ? t.toMillis() : 0;
+    const str = (v) => (typeof v === 'string' ? v : '');
+    const count = async (name) => (await S.getCountFromServer(S.collection(db, name))).data().count;
+
+    window.FB = {
+      onAuth: (cb) => U.onAuthStateChanged(auth,
+        (u) => cb(u ? { uid: u.uid, email: u.email || '', name: u.displayName || '' } : null),
+        () => cb(null)),
+      signIn: async () => {
+        try { await U.signInWithPopup(auth, provider); }
+        catch (e) {
+          if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment')) {
+            await U.signInWithRedirect(auth, provider);
+            return;
+          }
+          throw e;
+        }
+      },
+      signOut: () => U.signOut(auth),
+
+      getPlayer: async (uid) => {
+        const s = await S.getDoc(S.doc(db, 'players', uid));
+        if (!s.exists()) return null;
+        const d = s.data();
+        return { name: str(d.name), phone: str(d.phone) };
+      },
+      savePlayer: (uid, p) => S.setDoc(S.doc(db, 'players', uid), {
+        name: p.name, phone: p.phone, email: p.email, consent: true, createdAt: S.serverTimestamp()
+      }),
+      saveRound: (uid, score, won) => S.addDoc(S.collection(db, 'rounds'), {
+        uid, score, won, at: S.serverTimestamp()
+      }),
+      saveWin: async (uid, seed, d) => {
+        const ref = S.doc(db, 'wins', uid + '_' + seed);
+        try {
+          await S.setDoc(ref, {
+            uid, name: d.name, phone: d.phone, email: d.email, taps: d.taps, score: d.score,
+            status: 'pending', at: S.serverTimestamp()
+          });
+        } catch (e) {
+          // Saving the same win twice is refused by the rules. If it is already there, that is fine.
+          if (e && e.code === 'permission-denied') {
+            let there = false;
+            try { there = (await S.getDoc(ref)).exists(); } catch (_) {}
+            if (there) return;
+          }
+          throw e;
+        }
+      },
+      getMyWins: async (uid) => (await S.getDocs(S.query(S.collection(db, 'wins'), S.where('uid', '==', uid))))
+        .docs.map((d) => ({ id: d.id, status: str(d.data().status) || 'pending' })),
+
+      getBoard: async (week) => (await S.getDocs(S.query(S.collection(db, 'boards', week, 'entries'), S.orderBy('rank', 'desc'), S.limit(5))))
+        .docs.map((d) => { const x = d.data(); return { uid: d.id, name: str(x.name) || 'Player', best: Number(x.best) || 0, rank: Number(x.rank) || 0 }; }),
+      getMyEntry: async (week, uid) => {
+        const s = await S.getDoc(S.doc(db, 'boards', week, 'entries', uid));
+        return s.exists() ? (Number(s.data().best) || 0) : 0;
+      },
+      saveBoardEntry: (week, uid, e) => S.setDoc(S.doc(db, 'boards', week, 'entries', uid), {
+        name: e.name, best: e.best, rank: e.rank, at: S.serverTimestamp()
+      }),
+
+      ownerCounts: async () => {
+        const r = await Promise.all([count('players'), count('rounds'), count('wins')]);
+        return { players: r[0], rounds: r[1], wins: r[2] };
+      },
+      ownerListWins: async () => (await S.getDocs(S.query(S.collection(db, 'wins'), S.orderBy('at', 'desc'), S.limit(200))))
+        .docs.map((d) => { const x = d.data(); return { id: d.id, uid: str(x.uid), name: str(x.name), phone: str(x.phone), email: str(x.email), taps: str(x.taps), score: Number(x.score) || 0, status: str(x.status) || 'pending', at: ms(x.at) }; }),
+      ownerListPlayers: async () => (await S.getDocs(S.query(S.collection(db, 'players'), S.orderBy('createdAt', 'desc'), S.limit(300))))
+        .docs.map((d) => { const x = d.data(); return { id: d.id, name: str(x.name), phone: str(x.phone), email: str(x.email), createdAt: ms(x.createdAt) }; }),
+      updateWin: (id, status) => S.updateDoc(S.doc(db, 'wins', id), { status })
+    };
+    window.dispatchEvent(new Event('fb-ready'));
+  } catch (e) {
+    window.FBError = e;
+    window.dispatchEvent(new Event('fb-fail'));
+  }
 })();
 </script>
 </body>

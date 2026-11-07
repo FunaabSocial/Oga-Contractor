@@ -1,5 +1,5 @@
-// Keeps Stack Rush working offline. Change the version number below when you replace the icons or manifest.
-const CACHE = 'stack-rush-v1';
+// Keeps Oga Contractor working offline. Change the version number below when you replace the icons or manifest.
+const CACHE = 'oga-contractor-v2';
 const CORE = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
