@@ -322,6 +322,25 @@
   .player span { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
   .gate-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
 
+  /* ---- taunt strip: Oga's speech sits above the game, never over the blocks */
+  .strip { flex: none; height: 56px; display: flex; align-items: stretch; }
+  .strip .bubble {
+    position: static; top: auto; left: auto; z-index: auto; width: 100%; max-width: none;
+    display: flex; align-items: center; justify-content: flex-start;
+    font-size: 15px; line-height: 1.2; padding: 6px 14px; border-radius: 12px;
+    box-shadow: none; overflow: hidden; transform-origin: center;
+  }
+  .strip .bubble::before { display: none; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* ---- email sign-in */
+  .or { margin: 2px 0 0; color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+  .err.ok { color: var(--ok); }
+  .check.small { font-size: 13px; align-items: center; }
+  .linkbtn { background: none; border: 0; padding: 8px; color: var(--info); font: 700 14px var(--font-body); cursor: pointer; text-decoration: underline; }
+  .linkbtn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+  #emailForm .actions .btn { padding-left: 20px; padding-right: 20px; }
+
 </style>
 </head>
 <body>
@@ -351,10 +370,13 @@
 
   <div class="meter" id="meter" role="progressbar" aria-label="Blocks stacked" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><i id="meterFill"></i></div>
 
+  <div class="strip">
+    <div class="bubble" id="bubble" aria-live="polite" hidden><span id="taunt"></span></div>
+  </div>
+
   <div class="stage" id="stage">
     <canvas id="cv" aria-label="Tower stacking game"></canvas>
     <button class="mute" id="mute" type="button" aria-pressed="false">Sound on</button>
-    <div class="bubble" id="bubble" aria-live="polite" hidden><span id="taunt"></span></div>
     <div class="overlay" id="overlay" hidden>
       <div class="ov-inner">
         <p class="chip" id="ovChip">Free to play · Win ₦123</p>
@@ -386,8 +408,28 @@
         <div class="actions">
           <button class="btn" id="googleBtn" type="button" hidden>Sign in with Google</button>
           <button class="btn" id="retryBtn" type="button" hidden>Try again</button>
-          <button class="btn ghost" id="authBoardBtn" type="button" hidden>See the Top 5</button>
         </div>
+        <p class="or" id="orRow" hidden>or use your email</p>
+        <form class="pform" id="emailForm" hidden novalidate>
+          <div class="field"><label for="emEmail">Email</label><input id="emEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="120"></div>
+          <div class="field"><label for="emPass">Password</label><input id="emPass" type="password" autocomplete="current-password" autocapitalize="none" maxlength="100"></div>
+          <label class="check small"><input type="checkbox" id="emShow"><span>Show password</span></label>
+          <div class="actions">
+            <button class="btn" id="emSignIn" type="submit">Sign in</button>
+            <button class="btn ghost" id="emCreate" type="button">Create account</button>
+          </div>
+          <button class="linkbtn" id="emForgot" type="button">Forgot password?</button>
+          <p class="err" id="emMsg" role="alert"></p>
+        </form>
+        <div class="confirm" id="verifyBox" hidden>
+          <p id="verifyText"></p>
+          <div class="actions">
+            <button class="btn" id="verifyDone" type="button">I have confirmed it</button>
+            <button class="btn ghost" id="verifyResend" type="button">Send the email again</button>
+          </div>
+          <p class="err" id="verifyMsg" role="alert"></p>
+        </div>
+        <button class="btn ghost" id="authBoardBtn" type="button" hidden>See the Top 5</button>
         <form class="pform" id="profileForm" hidden novalidate>
           <div class="field"><label for="pfName">Your name</label><input id="pfName" autocomplete="name" maxlength="40"></div>
           <div class="field"><label for="pfPhone">Phone number</label><input id="pfPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="18" placeholder="0801 234 5678"></div>
@@ -407,17 +449,15 @@
           </div>
           <p class="err" id="pfSaveErr" role="alert"></p>
         </div>
-        <button class="btn ghost" id="authSignOut" type="button" hidden>Use a different Google account</button>
+        <button class="btn ghost" id="authSignOut" type="button" hidden>Use a different account</button>
         <p class="fine" id="authFine" hidden>We save your name, Gmail and phone number to run the game and send prizes.</p>
       </div>
     </div>
   </div>
 
   <dl class="stats">
-    <div><dt>Rounds</dt><dd id="stRounds">0</dd></div>
     <div><dt>Best</dt><dd id="stBest">0</dd></div>
     <div><dt>Boss beaten</dt><dd id="stWins">0</dd></div>
-    <div><dt>Win rate</dt><dd id="stRate">0%</dd></div>
   </dl>
   <div class="acct">
     <span class="who" id="who"></span>
@@ -696,10 +736,8 @@
   } catch (e) {}
   function saveStats() { try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch (e) {} }
   function showStats() {
-    $('stRounds').textContent = stats.played;
     $('stBest').textContent = stats.best;
     $('stWins').textContent = stats.wins;
-    $('stRate').textContent = stats.played ? Math.round(stats.wins / stats.played * 100) + '%' : '0%';
   }
 
   // ---- a win waiting to be saved. It stays on the phone until the database has it.
@@ -903,8 +941,14 @@
     const c = e && e.code;
     if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return 'Sign-in was cancelled. Tap the button to try again.';
     if (c === 'auth/network-request-failed') return 'No internet. Check your connection and try again.';
+    if (c === 'auth/email-already-in-use') return 'That email already has an account. Tap Sign in, or Forgot password. If you used Google before, use the Google button.';
+    if (c === 'auth/invalid-email') return 'That email does not look right. Check it and try again.';
+    if (c === 'auth/weak-password') return 'Choose a password with at least 6 characters.';
+    if (c === 'auth/invalid-credential' || c === 'auth/wrong-password' || c === 'auth/user-not-found' || c === 'auth/invalid-login-credentials') return 'Wrong email or password. If you signed up with Google, use the Google button.';
+    if (c === 'auth/too-many-requests') return 'Too many tries. Wait a few minutes and try again.';
+    if (c === 'auth/user-disabled') return 'This account has been switched off.';
     if (c === 'auth/unauthorized-domain') return 'This website is not allowed to sign in yet. The owner must add it under Authorized domains in Firebase.';
-    if (c === 'auth/operation-not-allowed') return 'Google sign-in is not switched on yet. The owner must turn it on in Firebase.';
+    if (c === 'auth/operation-not-allowed') return e.emailForm ? 'Email sign-in is not switched on yet. The owner must turn on Email/Password in Firebase.' : 'Google sign-in is not switched on yet. The owner must turn it on in Firebase.';
     if (e && (e.message === 'fb-timeout' || e.message === 'fb-fail')) return 'Could not reach the game server. Check your internet and try again.';
     return 'Sign-in did not work' + (c ? ' (' + c + ')' : '') + '. Try again.';
   }
@@ -927,24 +971,33 @@
   // ---- the sign-in / sign-up screen
   const profileForm = $('profileForm'), pfConfirm = $('pfConfirm');
   let draft = null;
+  let authMode = 'loading';
   function showAuth(mode, msg) {
+    authMode = mode;
     authOv.hidden = false;
     overlay.hidden = true;
     $('googleBtn').hidden = mode !== 'out';
+    $('orRow').hidden = mode !== 'out';
+    $('emailForm').hidden = mode !== 'out';
     $('authBoardBtn').hidden = mode !== 'out';
     $('retryBtn').hidden = mode !== 'error';
-    $('authSignOut').hidden = !(me && (mode === 'form' || mode === 'confirm' || mode === 'error'));
+    $('authSignOut').hidden = !(me && (mode === 'form' || mode === 'confirm' || mode === 'error' || mode === 'verify'));
     $('authFine').hidden = mode !== 'out';
     profileForm.hidden = mode !== 'form';
     pfConfirm.hidden = mode !== 'confirm';
+    $('verifyBox').hidden = mode !== 'verify';
     $('authTitle').hidden = mode === 'form' || mode === 'confirm';
     $('authChip').hidden = mode === 'form' || mode === 'confirm';
     const text = $('authText');
     text.hidden = mode === 'confirm';
     if (mode === 'loading') text.textContent = msg || 'Loading…';
-    else if (mode === 'out') text.textContent = 'Sign in with Google to play. You need an account so we can send your prize if you win.';
+    else if (mode === 'out') text.textContent = 'Sign in to play. You need an account so we can send your prize if you win.';
     else if (mode === 'form') text.textContent = 'One more step. Tell us where to send your prize.';
-    else if (mode === 'error') text.textContent = msg || 'Something went wrong.';
+    else if (mode === 'verify') {
+      text.textContent = 'Check your email';
+      $('verifyText').textContent = 'We sent a link to ' + (me ? me.email : 'your email') + '. Tap the link, then come back here and tap the button. If you cannot find it, look in your spam folder.';
+      $('verifyMsg').textContent = ''; $('verifyMsg').className = 'err';
+    } else if (mode === 'error') text.textContent = msg || 'Something went wrong.';
     if (mode !== 'out' && mode !== 'error') $('authErr').textContent = '';
     authOv.scrollTop = 0;
   }
@@ -963,7 +1016,64 @@
   $('authSignOut').addEventListener('click', doSignOut);
   $('retryBtn').addEventListener('click', () => location.reload());
 
-  async function onUser(u) {
+  // ---- email and password
+  const emMsg = $('emMsg');
+  function emSay(t, ok) { emMsg.textContent = t; emMsg.className = 'err' + (ok ? ' ok' : ''); }
+  function emFields() { return { email: $('emEmail').value.trim(), pass: $('emPass').value }; }
+  function emError(e) { e = e || {}; e.emailForm = true; emSay(authMsg(e)); }
+  async function emRun(btn, fn) {
+    const btns = [$('emSignIn'), $('emCreate'), $('emForgot')];
+    btns.forEach((b) => { b.disabled = true; });
+    emSay('');
+    try { const f = await whenFB(); await fn(f); }
+    catch (e) { emError(e); }
+    btns.forEach((b) => { b.disabled = false; });
+  }
+  $('emShow').addEventListener('change', () => { $('emPass').type = $('emShow').checked ? 'text' : 'password'; });
+  $('emailForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const v = emFields();
+    if (!v.email || !v.pass) { emSay('Type your email and your password.'); return; }
+    emRun(null, (f) => f.emailSignIn(v.email, v.pass));
+  });
+  $('emCreate').addEventListener('click', () => {
+    const v = emFields();
+    if (!v.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) { emSay('Type a real email address.'); return; }
+    if (v.pass.length < 6) { emSay('Choose a password with at least 6 characters.'); return; }
+    emRun(null, (f) => f.emailCreate(v.email, v.pass));
+  });
+  $('emForgot').addEventListener('click', () => {
+    const v = emFields();
+    if (!v.email) { emSay('Type your email above first, then tap Forgot password.'); return; }
+    emRun(null, async (f) => { await f.resetPassword(v.email); emSay('If that email has an account, we sent a link to choose a new password. Check your spam folder too.', true); });
+  });
+
+  // ---- waiting for the player to tap the link in their email
+  let checking = false;
+  async function checkVerified(silent) {
+    if (checking || !me) return;
+    checking = true;
+    const msg = $('verifyMsg');
+    if (!silent) { msg.className = 'err'; msg.textContent = ''; }
+    try {
+      const f = await whenFB();
+      const fresh = await f.refreshUser();
+      if (fresh && fresh.verified) { checking = false; onUser(fresh, true); return; }
+      if (!silent) msg.textContent = 'Not confirmed yet. Open the email, tap the link, then try again.';
+    } catch (e) { if (!silent) msg.textContent = authMsg(e); }
+    checking = false;
+  }
+  $('verifyDone').addEventListener('click', () => checkVerified(false));
+  $('verifyResend').addEventListener('click', async () => {
+    const msg = $('verifyMsg'), b = $('verifyResend');
+    b.disabled = true; msg.className = 'err'; msg.textContent = '';
+    try { const f = await whenFB(); await f.sendVerification(); msg.className = 'err ok'; msg.textContent = 'Sent again. Check your inbox and spam folder.'; }
+    catch (e) { msg.textContent = authMsg(e); }
+    b.disabled = false;
+  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && authMode === 'verify') checkVerified(true); });
+
+  async function onUser(u, fromRefresh) {
     const tok = ++authToken;
     authKnown = true;
     me = u; player = null;
@@ -975,6 +1085,7 @@
       return;
     }
     updateWho(); renderGate();
+    if (!u.verified) { showAuth('verify'); if (!fromRefresh) checkVerified(true); return; }
     showAuth('loading', 'Checking your account…');
     try {
       const f = await whenFB();
@@ -1559,7 +1670,7 @@ const CFG = {
 
     window.FB = {
       onAuth: (cb) => U.onAuthStateChanged(auth,
-        (u) => cb(u ? { uid: u.uid, email: u.email || '', name: u.displayName || '' } : null),
+        (u) => cb(u ? { uid: u.uid, email: u.email || '', name: u.displayName || '', verified: !!u.emailVerified } : null),
         () => cb(null)),
       signIn: async () => {
         try { await U.signInWithPopup(auth, provider); }
@@ -1572,6 +1683,20 @@ const CFG = {
         }
       },
       signOut: () => U.signOut(auth),
+      emailSignIn: (email, pass) => U.signInWithEmailAndPassword(auth, email, pass),
+      emailCreate: async (email, pass) => {
+        const c = await U.createUserWithEmailAndPassword(auth, email, pass);
+        try { await U.sendEmailVerification(c.user); } catch (e) {}
+      },
+      sendVerification: () => U.sendEmailVerification(auth.currentUser),
+      resetPassword: (email) => U.sendPasswordResetEmail(auth, email),
+      refreshUser: async () => {
+        const u = auth.currentUser;
+        if (!u) return null;
+        await u.reload();
+        await u.getIdToken(true);   // so the database sees the confirmed email straight away
+        return { uid: u.uid, email: u.email || '', name: u.displayName || '', verified: !!u.emailVerified };
+      },
 
       getPlayer: async (uid) => {
         const s = await S.getDoc(S.doc(db, 'players', uid));
