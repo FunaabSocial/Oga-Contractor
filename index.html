@@ -470,7 +470,7 @@
   <div class="acct">
     <span class="who" id="who"></span>
     <span class="acct-btns">
-      <button class="mini gold" id="boardBtn" type="button">Top 5 this week</button>
+      <button class="mini gold" id="boardBtn" type="button">Top 5 today</button>
       <button class="mini" id="signOutBtn" type="button" hidden>Sign out</button>
     </span>
   </div>
@@ -503,8 +503,8 @@
 <div class="sheet" id="boardSheet" role="dialog" aria-modal="true" aria-labelledby="boardTitle" hidden>
   <div class="card">
     <div>
-      <p class="role">Resets every Sunday</p>
-      <h2 id="boardTitle">Top 5 this week</h2>
+      <p class="role">Resets every midnight</p>
+      <h2 id="boardTitle">Top 5 today</h2>
     </div>
     <ol class="board" id="boardList"></ol>
     <p class="fine" id="boardMsg"></p>
@@ -719,11 +719,11 @@
     let t = 0; return parts.map((x) => (t += x));
   }
 
-  // ---- weeks. The board starts fresh every Sunday at midnight Nigerian time (WAT, UTC+1).
+  // ---- days. The board starts fresh every day at midnight Nigerian time (WAT, UTC+1).
   const WAT = 3600000;
-  function weekInfo(now) {
+  function dayInfo(now) {
     const t = new Date((now == null ? Date.now() : now) + WAT);
-    const startUTC = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() - t.getUTCDay());
+    const startUTC = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
     const s = new Date(startUTC);
     const key = s.getUTCFullYear() + '-' + String(s.getUTCMonth() + 1).padStart(2, '0') + '-' + String(s.getUTCDate()).padStart(2, '0');
     return { key, startMs: startUTC - WAT };
@@ -731,7 +731,7 @@
   // One number that sorts by height first and, for equal heights, by who got there first.
   function rankFor(best, now) {
     now = now == null ? Date.now() : now;
-    const secs = Math.max(0, Math.min(9999998, Math.floor((now - weekInfo(now).startMs) / 1000)));
+    const secs = Math.max(0, Math.min(9999998, Math.floor((now - dayInfo(now).startMs) / 1000)));
     return best * 1e7 + (9999999 - secs);
   }
   function hashStr(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
@@ -969,7 +969,7 @@
 
   // ---- who is signed in
   let me = null, player = null, authKnown = false, authToken = 0, fbFailed = false;
-  let myBest = 0, bestWeek = '', inflightBest = 0, myWins = [], winMsg = '', saving = false, curMode = 'start';
+  let myBest = 0, bestDay = '', inflightBest = 0, myWins = [], winMsg = '', saving = false, curMode = 'start';
 
   function updateWho() {
     $('who').textContent = me && player ? player.name + ' · airtime goes to ' + fmtPhone(player.phone) : (me ? me.email : '');
@@ -1154,17 +1154,17 @@
 
   // ---- this player's board entry and past wins
   function getMyBest() {
-    const wk = weekInfo().key;
-    if (bestWeek !== wk) { bestWeek = wk; myBest = 0; inflightBest = 0; }
+    const wk = dayInfo().key;
+    if (bestDay !== wk) { bestDay = wk; myBest = 0; inflightBest = 0; }
     return myBest;
   }
   async function refreshMyBest() {
     if (!me) return;
-    const uid = me.uid, wk = weekInfo().key;
+    const uid = me.uid, wk = dayInfo().key;
     try {
       const f = await whenFB();
       const b = await f.getMyEntry(wk, uid);
-      if (me && me.uid === uid) { getMyBest(); if (bestWeek === wk && b > myBest) myBest = b; }
+      if (me && me.uid === uid) { getMyBest(); if (bestDay === wk && b > myBest) myBest = b; }
     } catch (e) {}
   }
   async function refreshMyWins() {
@@ -1184,9 +1184,9 @@
     whenFB().then((f) => f.saveRound(uid, n, won)).catch(() => {});
     if (n >= 1 && n > getMyBest() && n > inflightBest) {
       inflightBest = n;
-      const wk = weekInfo().key, now = Date.now(), nm = boardName(player ? player.name : '');
+      const wk = dayInfo().key, now = Date.now(), nm = boardName(player ? player.name : '');
       whenFB().then((f) => f.saveBoardEntry(wk, uid, { name: nm, best: n, rank: rankFor(n, now) })).then(() => {
-        if (bestWeek === wk && n > myBest) myBest = n;
+        if (bestDay === wk && n > myBest) myBest = n;
       }).catch(() => { if (inflightBest === n) inflightBest = 0; });
     }
   }
@@ -1309,11 +1309,11 @@
     if (r.win) finish();
   }
 
-  // ---- Top 5 board: real players this week plus Oga's workers (computer players)
+  // ---- Top 5 board: real players today plus Oga's workers (computer players)
   const FIRST_NAMES = ['Chidi', 'Aisha', 'Tunde', 'Ngozi', 'Emeka', 'Bola', 'Ibrahim', 'Funke', 'Segun', 'Amaka', 'Yusuf', 'Kemi', 'Obinna', 'Hauwa', 'Femi', 'Zainab', 'Ifeanyi', 'Sade', 'Musa', 'Chioma', 'Dayo', 'Halima', 'Uche', 'Titi', 'Kunle', 'Nneka', 'Bashir', 'Folake', 'Ebuka', 'Rashida', 'Gbenga', 'Ada', 'Tobi', 'Maryam', 'Chinedu', 'Yetunde', 'Sola', 'Ifeoma', 'Kelechi', 'Damilola'];
   const INITIALS = 'ABCDEFGHIJKLMNOPRSTUWY';
-  function makeWorkers(week) {
-    const r = mulberry32(hashStr('oga-workers:' + week));
+  function makeWorkers(day) {
+    const r = mulberry32(hashStr('oga-workers:' + day));
     const used = new Set(), out = [];
     while (out.length < WORKER_COUNT) {
       const name = FIRST_NAMES[Math.floor(r() * FIRST_NAMES.length)] + ' ' + INITIALS[Math.floor(r() * INITIALS.length)] + '.';
@@ -1323,15 +1323,15 @@
     }
     return out;
   }
-  function buildBoard(real, week) {
+  function buildBoard(real, day) {
     const rows = real.map((x) => ({ real: true, uid: x.uid, name: x.name, best: x.best, rank: x.rank }))
-      .concat(makeWorkers(week).map((x) => ({ real: false, uid: '', name: x.name, best: x.best, rank: 0 })));
+      .concat(makeWorkers(day).map((x) => ({ real: false, uid: '', name: x.name, best: x.best, rank: 0 })));
     rows.sort((a, b) => (b.best - a.best) || ((b.real ? 1 : 0) - (a.real ? 1 : 0)) || (b.rank - a.rank));
     return rows.slice(0, 5);
   }
   const boardSheet = $('boardSheet');
   function renderBoard(real, failed) {
-    const wk = weekInfo().key, top = buildBoard(real, wk), list = $('boardList');
+    const wk = dayInfo().key, top = buildBoard(real, wk), list = $('boardList');
     list.textContent = '';
     let mine = 0;
     top.forEach((r, i) => {
@@ -1350,8 +1350,8 @@
     const fifth = top[4], need = Math.min(C.targetHeight, fifth.real ? fifth.best + 1 : fifth.best), b = getMyBest();
     let msg;
     if (!me) msg = 'Sign in and stack ' + need + ' or more to get on the board.';
-    else if (mine) msg = 'You are number ' + mine + ' this week.';
-    else if (b > 0) msg = 'Your best this week is ' + b + '. Stack ' + need + ' or more to get into the Top 5.';
+    else if (mine) msg = 'You are number ' + mine + ' today.';
+    else if (b > 0) msg = 'Your best today is ' + b + '. Stack ' + need + ' or more to get into the Top 5.';
     else msg = 'Stack ' + need + ' or more to get into the Top 5.';
     if (failed) msg = 'Could not load real players right now, so only Oga’s workers show. ' + msg;
     $('boardMsg').textContent = msg;
@@ -1364,7 +1364,7 @@
     $('boardClose').focus();
     try {
       const f = await whenFB();
-      const real = await f.getBoard(weekInfo().key);
+      const real = await f.getBoard(dayInfo().key);
       if (!boardSheet.hidden) renderBoard(real, false);
     } catch (e) { if (!boardSheet.hidden) renderBoard([], true); }
   }
